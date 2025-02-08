@@ -13,7 +13,7 @@ defineProps<{
 <style scoped>
 .code-container {
   width: 100%;
-  height: 50%;
+  height: 75%;
   padding: var(--spacing-lg);
   display: block;
 }

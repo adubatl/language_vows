@@ -1,5 +1,59 @@
 <script setup lang="ts">
-defineEmits(['runTest'])
+import { ref } from 'vue'
+import type { LanguageVow, Language } from '@/types/vow'
+import { ALL_VOWS } from '@/constants/vows'
+
+defineProps<{
+  displayText: string
+}>()
+
+const emit = defineEmits(['create', 'read', 'update', 'delete', 'missy-moves'])
+
+const newVowText = ref('')
+const updateVowText = ref('')
+const selectedVow = ref<string>('') // For storing selected vow ID
+const selectedLanguage = ref<Language>('typescript')
+
+const languages: Language[] = ['typescript', 'go', 'python']
+
+function handleCreate() {
+  emit('create', {
+    text: newVowText.value,
+    language: selectedLanguage.value,
+  })
+  newVowText.value = '' // Clear input after creation
+}
+
+function handleUpdate() {
+  if (selectedVow.value) {
+    emit('update', {
+      id: selectedVow.value,
+      text: updateVowText.value,
+    })
+  }
+}
+
+function handleRead() {
+  if (selectedVow.value) {
+    emit('read', selectedVow.value)
+  }
+}
+
+function handleDelete() {
+  if (selectedVow.value) {
+    emit('delete', selectedVow.value)
+  }
+}
+
+// When a vow is selected from dropdown, populate update text field
+function onVowSelect(event: Event) {
+  const target = event.target as HTMLSelectElement
+  selectedVow.value = target.value
+  const selectedVowObj = ALL_VOWS.find((vow) => vow.id === target.value)
+  if (selectedVowObj) {
+    updateVowText.value = selectedVowObj.text
+  }
+}
 </script>
 
 <template>
@@ -11,31 +65,65 @@ defineEmits(['runTest'])
 
     <div class="sidebar-section">
       <h2>Display</h2>
-      <button class="test-button" @click="$emit('runTest')">Run Test</button>
+      <button class="test-button" @click="$emit('missy-moves')">{{ displayText }}</button>
     </div>
 
     <hr class="section-divider" />
 
     <div class="sidebar-section">
       <h2>Create</h2>
+      <select v-model="selectedLanguage" class="select-input">
+        <option v-for="lang in languages" :key="lang" :value="lang">
+          {{ lang.charAt(0).toUpperCase() + lang.slice(1) }}
+        </option>
+      </select>
+      <input v-model="newVowText" type="text" class="text-input" placeholder="Enter your vow..." />
+      <button class="test-button" @click="handleCreate">Create Vow</button>
     </div>
 
     <hr class="section-divider" />
 
     <div class="sidebar-section">
       <h2>Read</h2>
+      <select v-model="selectedVow" class="select-input" @change="onVowSelect">
+        <option value="">Select a vow</option>
+        <option v-for="vow in ALL_VOWS" :key="vow.id" :value="vow.id">
+          {{ vow.text.slice(0, 30) }}...
+        </option>
+      </select>
+      <button class="test-button" @click="handleRead">Read Vow</button>
     </div>
 
     <hr class="section-divider" />
 
     <div class="sidebar-section">
       <h2>Update</h2>
+      <select v-model="selectedVow" class="select-input" @change="onVowSelect">
+        <option value="">Select a vow</option>
+        <option v-for="vow in ALL_VOWS" :key="vow.id" :value="vow.id">
+          {{ vow.text.slice(0, 30) }}...
+        </option>
+      </select>
+      <input
+        v-model="updateVowText"
+        type="text"
+        class="text-input"
+        placeholder="Update vow text..."
+      />
+      <button class="test-button" @click="handleUpdate">Update Vow</button>
     </div>
 
     <hr class="section-divider" />
 
     <div class="sidebar-section">
       <h2>Delete</h2>
+      <select v-model="selectedVow" class="select-input" @change="onVowSelect">
+        <option value="">Select a vow</option>
+        <option v-for="vow in ALL_VOWS" :key="vow.id" :value="vow.id">
+          {{ vow.text.slice(0, 30) }}...
+        </option>
+      </select>
+      <button class="test-button" @click="handleDelete">Delete Vow</button>
     </div>
   </div>
 </template>
@@ -92,5 +180,31 @@ defineEmits(['runTest'])
 
 .test-button:hover {
   background-color: var(--button-hover);
+}
+
+.text-input {
+  width: 100%;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid var(--border-color);
+  background: var(--button-bg);
+  color: var(--text-color);
+  border-radius: 4px;
+}
+
+.select-input {
+  width: 100%;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid var(--border-color);
+  background: var(--button-bg);
+  color: var(--text-color);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.select-input option {
+  background: var(--bg-color);
+  color: var(--text-color);
 }
 </style>
