@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS vows (
+    id VARCHAR(255) PRIMARY KEY,
+    text TEXT NOT NULL,
+    language VARCHAR(50) NOT NULL
+); 
