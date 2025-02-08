@@ -42,6 +42,4 @@ defineProps<{
   transform-style: preserve-3d;
   backface-visibility: visible;
 }
-
-/* Remove unused styles */
 </style>

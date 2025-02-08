@@ -68,7 +68,7 @@ function handleCreate(newVow: { text: string; language: LanguageVow['language'] 
     language: newVow.language,
     id: `${newVow.language}-${Math.random().toString(36).substr(2, 9)}`,
   }
-  vows.value.push(vow)
+  vows.value = [vow, ...vows.value]
   outputContent.value = `✨ Created new vow:\n${vow.text}`
 }
 
@@ -101,6 +101,7 @@ function handleDelete(vowId: string) {
   <div class="app-container">
     <SidebarPanel
       :display-text="displayText"
+      :vows="vows"
       @missy-moves="handleMissyMoves"
       @create="handleCreate"
       @read="handleRead"

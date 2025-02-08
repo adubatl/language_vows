@@ -1,10 +1,21 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import type { LanguageVow, Language } from '@/types/vow'
-import { ALL_VOWS } from '@/constants/vows'
+import {
+  PlusCircleIcon,
+  BookOpenIcon,
+  PencilSquareIcon,
+  TrashIcon,
+} from '@heroicons/vue/24/outline'
+import {
+  CodeBracketIcon, // For TypeScript
+  CubeIcon, // For Go
+  BeakerIcon, // For Python
+} from '@heroicons/vue/24/solid'
 
-defineProps<{
+const props = defineProps<{
   displayText: string
+  vows: LanguageVow[] // New prop to receive vows from parent
 }>()
 
 const emit = defineEmits(['create', 'read', 'update', 'delete', 'missy-moves'])
@@ -15,6 +26,12 @@ const selectedVow = ref<string>('') // For storing selected vow ID
 const selectedLanguage = ref<Language>('typescript')
 
 const languages: Language[] = ['typescript', 'go', 'python']
+
+const languageIcons = {
+  typescript: CodeBracketIcon,
+  go: CubeIcon,
+  python: BeakerIcon,
+}
 
 function handleCreate() {
   emit('create', {
@@ -42,6 +59,8 @@ function handleRead() {
 function handleDelete() {
   if (selectedVow.value) {
     emit('delete', selectedVow.value)
+    selectedVow.value = '' // Clear selection after delete
+    updateVowText.value = '' // Clear update text after delete
   }
 }
 
@@ -49,10 +68,18 @@ function handleDelete() {
 function onVowSelect(event: Event) {
   const target = event.target as HTMLSelectElement
   selectedVow.value = target.value
-  const selectedVowObj = ALL_VOWS.find((vow) => vow.id === target.value)
+  const selectedVowObj = props.vows.find((vow) => vow.id === target.value)
   if (selectedVowObj) {
     updateVowText.value = selectedVowObj.text
   }
+}
+
+// Add this function to handle text truncation
+function truncateText(text: string, maxLength: number) {
+  if (text.length <= maxLength) {
+    return text
+  }
+  return `${text.slice(0, maxLength)}...`
 }
 </script>
 
@@ -71,9 +98,13 @@ function onVowSelect(event: Event) {
     <hr class="section-divider" />
 
     <div class="sidebar-section">
-      <h2>Create</h2>
+      <div class="section-header">
+        <PlusCircleIcon class="section-icon" />
+        <h2>Create</h2>
+      </div>
       <select v-model="selectedLanguage" class="select-input">
         <option v-for="lang in languages" :key="lang" :value="lang">
+          <component :is="languageIcons[lang]" class="language-icon" />
           {{ lang.charAt(0).toUpperCase() + lang.slice(1) }}
         </option>
       </select>
@@ -84,11 +115,15 @@ function onVowSelect(event: Event) {
     <hr class="section-divider" />
 
     <div class="sidebar-section">
-      <h2>Read</h2>
+      <div class="section-header">
+        <BookOpenIcon class="section-icon" />
+        <h2>Read</h2>
+      </div>
       <select v-model="selectedVow" class="select-input" @change="onVowSelect">
         <option value="">Select a vow</option>
-        <option v-for="vow in ALL_VOWS" :key="vow.id" :value="vow.id">
-          {{ vow.text.slice(0, 30) }}...
+        <option v-for="vow in vows" :key="vow.id" :value="vow.id">
+          <component :is="languageIcons[vow.language]" class="language-icon" />
+          {{ truncateText(vow.text, 30) }}
         </option>
       </select>
       <button class="test-button" @click="handleRead">Read Vow</button>
@@ -97,11 +132,15 @@ function onVowSelect(event: Event) {
     <hr class="section-divider" />
 
     <div class="sidebar-section">
-      <h2>Update</h2>
+      <div class="section-header">
+        <PencilSquareIcon class="section-icon" />
+        <h2>Update</h2>
+      </div>
       <select v-model="selectedVow" class="select-input" @change="onVowSelect">
         <option value="">Select a vow</option>
-        <option v-for="vow in ALL_VOWS" :key="vow.id" :value="vow.id">
-          {{ vow.text.slice(0, 30) }}...
+        <option v-for="vow in vows" :key="vow.id" :value="vow.id">
+          <component :is="languageIcons[vow.language]" class="language-icon" />
+          {{ truncateText(vow.text, 30) }}
         </option>
       </select>
       <input
@@ -116,11 +155,15 @@ function onVowSelect(event: Event) {
     <hr class="section-divider" />
 
     <div class="sidebar-section">
-      <h2>Delete</h2>
+      <div class="section-header">
+        <TrashIcon class="section-icon" />
+        <h2>Delete</h2>
+      </div>
       <select v-model="selectedVow" class="select-input" @change="onVowSelect">
         <option value="">Select a vow</option>
-        <option v-for="vow in ALL_VOWS" :key="vow.id" :value="vow.id">
-          {{ vow.text.slice(0, 30) }}...
+        <option v-for="vow in vows" :key="vow.id" :value="vow.id">
+          <component :is="languageIcons[vow.language]" class="language-icon" />
+          {{ truncateText(vow.text, 30) }}
         </option>
       </select>
       <button class="test-button" @click="handleDelete">Delete Vow</button>
@@ -206,5 +249,39 @@ function onVowSelect(event: Event) {
 .select-input option {
   background: var(--bg-color);
   color: var(--text-color);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.section-header h2 {
+  margin: 0;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+
+.section-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #666;
+  flex-shrink: 0;
+}
+
+.language-icon {
+  width: 1rem;
+  height: 1rem;
+  margin-right: var(--spacing-sm);
+  vertical-align: middle;
+}
+
+.select-input option {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
 }
 </style>
