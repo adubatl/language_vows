@@ -1,61 +1,102 @@
-# language_vows
+# Language Vows
 
-This template should help get you started developing with Vue 3 in Vite.
+_What a cool anagram of golang+vue+aws. Yes I named the project first, then built the application based on the name._
 
-## Recommended IDE Setup
+A Vue 3 + TypeScript application for managing programming language vows, with a Go backend and PostgreSQL database.
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## Development Setup
 
-## Type Support for `.vue` Imports in TS
+### Prerequisites
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+- Node.js (v18+)
+- Go (v1.23+)
+- Docker and Docker Compose
+- VSCode (or Cursor) (recommended)
 
-## Customize configuration
+### VSCode Configuration
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+1. Install the recommended extensions:
 
-## Project Setup
+   - Vue.volar (Vue 3 support)
+   - vitest.explorer (Unit testing)
+   - dbaeumer.vscode-eslint (ESLint)
+   - EditorConfig.EditorConfig (EditorConfig)
+   - esbenp.prettier-vscode (Prettier)
+   - skellock.just (Justfile support)
 
-```sh
-npm install
-```
+2. Add the following to your VSCode settings.json (already configured in .vscode/settings.json):
+   ```json
+   {
+     "editor.formatOnSave": true,
+     "editor.defaultFormatter": "esbenp.prettier-vscode",
+     "editor.codeActionsOnSave": {
+       "source.fixAll": "explicit"
+     },
+     "files.associations": {
+       "justfile": "just"
+     }
+   }
+   ```
 
-### Compile and Hot-Reload for Development
+### Project Setup
 
-```sh
-npm run dev
-```
+1. Install dependencies:
 
-### Type-Check, Compile and Minify for Production
+   ```sh
+   npm install
+   ```
 
-```sh
-npm run build
-```
+2. Start the database:
 
-### Run Unit Tests with [Vitest](https://vitest.dev/)
+   ```sh
+   just db-up
+   ```
 
-```sh
-npm run test:unit
-```
+3. Initialize the database:
 
-### Run End-to-End Tests with [Cypress](https://www.cypress.io/)
+   ```sh
+   just db-init-all
+   ```
 
-```sh
-npm run test:e2e:dev
-```
+4. Start the backend (database + Go server):
 
-This runs the end-to-end tests against the Vite development server.
-It is much faster than the production build.
+   ```sh
+   just be
+   ```
 
-But it's still recommended to test the production build with `test:e2e` before deploying (e.g. in CI environments):
+5. Start the frontend:
 
-```sh
-npm run build
-npm run test:e2e
-```
+   ```sh
+   just fe
+   ```
 
-### Lint with [ESLint](https://eslint.org/)
+The application should now be running at http://localhost:5173
 
-```sh
-npm run lint
-```
+## Available Commands
+
+### Frontend (npm/just)
+
+- `just fe` or `just frontend-up` - Start development server
+- `npm run build` - Build for production
+- `npm run test:unit` - Run unit tests
+- `npm run test:e2e` - Run end-to-end tests
+- `npm run lint` - Lint code
+- `npm run format` - Format code with Prettier
+
+### Backend (just)
+
+- `just be` or `just start` - Start both database and backend
+- `just db-up` - Start PostgreSQL container
+- `just db-down` - Stop PostgreSQL container
+- `just db-init` - Initialize database schema
+- `just db-restore` - Restore from seed data
+- `just go-run` - Start Go backend server
+- `just db-connect` - Connect to PostgreSQL database
+- `just db-tables` - Show all tables
+- `just db-vows` - Show contents of vows table
+- `just db-count [table]` - Count rows in a table
+- `just db-clear` - Clear all vows
+- `just db-backup [type]` - Backup database
+- `just db-init-all` - Initialize schema and seed data
+
+## Project Structure

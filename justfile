@@ -2,6 +2,11 @@
 default:
     @just --list
 
+# Start up the frontend
+frontend-up:
+    npm run dev
+alias fe := frontend-up
+
 # Start the database container
 db-up:
     ./scripts/db-up.sh
@@ -47,6 +52,7 @@ go-run:
 start:
     just db-up
     just go-run
+alias be := start
 
 # Backup the database to a file (seed.sql or timestamped)
 db-backup type="timestamp":
