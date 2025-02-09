@@ -45,6 +45,9 @@ export const useThemeStore = defineStore('theme', {
       text:
         getComputedStyle(document.documentElement).getPropertyValue('--text-color').trim() ||
         '#ffffff',
+      accent:
+        getComputedStyle(document.documentElement).getPropertyValue('--icon-color').trim() ||
+        '#93cf85',
     } as Theme,
     baseTheme: {
       name: 'Base Theme',
@@ -54,6 +57,9 @@ export const useThemeStore = defineStore('theme', {
       text:
         getComputedStyle(document.documentElement).getPropertyValue('--text-color').trim() ||
         '#ffffff',
+      accent:
+        getComputedStyle(document.documentElement).getPropertyValue('--icon-color').trim() ||
+        '#93cf85',
     } as Theme,
   }),
 
@@ -63,6 +69,7 @@ export const useThemeStore = defineStore('theme', {
       // Apply theme to document
       document.documentElement.style.setProperty('--bg-color', theme.background)
       document.documentElement.style.setProperty('--text-color', theme.text)
+      document.documentElement.style.setProperty('--accent-color', theme.accent)
 
       // Calculate and set hover color (darken for light backgrounds, lighten for dark ones)
       const isLightBackground = getLuminance(...hexToRgb(theme.background)) > 0.5

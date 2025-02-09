@@ -1,7 +1,7 @@
 <template>
   <div class="sidebar-section">
     <div class="section-header">
-      <component :is="icon" class="section-icon" />
+      <Icon :icon="icon" class="section-icon" />
       <h2>{{ title }}</h2>
     </div>
     <slot></slot>
@@ -9,10 +9,10 @@
 </template>
 
 <script setup lang="ts">
-import type { Component } from 'vue'
+import { Icon } from '@iconify/vue'
 
 defineProps<{
-  icon: Component
+  icon: string
   title: string
 }>()
 </script>
@@ -22,7 +22,7 @@ defineProps<{
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
 }
 
 .section-header h2 {
@@ -33,14 +33,14 @@ defineProps<{
   font-size: 0.875rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--icon-color);
+  color: var(--accent-color);
   font-weight: 600;
 }
 
 .section-icon {
   width: 1.25rem;
   height: 1.25rem;
-  color: var(--icon-color);
+  color: var(--accent-color);
   flex-shrink: 0;
 }
 </style>

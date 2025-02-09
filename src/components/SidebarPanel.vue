@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { Icon } from '@iconify/vue'
 import type { LanguageVow } from '@/types/vow'
 
 import ThemeSection from './sections/ThemeSection.vue'
@@ -41,9 +42,17 @@ watch(
 <template>
   <div class="left-panel">
     <div class="sidebar-header">
-      <span class="emoji">🙏</span>
-      <h1>Language Vows</h1>
-      <span class="emoji">🙏</span>
+      <div class="emoji-row">
+        <span>🙏</span>
+        <Icon icon="logos:python" class="language-icon" />
+        <span>🙏</span>
+      </div>
+      <h1>🙏 Vow Maker 🙏</h1>
+      <div class="emoji-row">
+        <Icon icon="logos:typescript-icon" class="language-icon" />
+        <span>🙏</span>
+        <Icon icon="logos:go" class="language-icon" />
+      </div>
     </div>
 
     <DisplaySection :display-text="displayText" @missy-moves="$emit('missy-moves')" />
@@ -86,23 +95,33 @@ watch(
 }
 
 .sidebar-header {
+  flex-direction: column;
+  text-align: center;
+  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-md);
+}
+
+.emoji-row {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: var(--spacing-md);
-  margin-bottom: var(--spacing-xl);
 }
 
-.sidebar-header .emoji {
-  font-size: 1.5rem;
+.emoji-row span {
+  font-size: 1.25rem;
 }
 
-.sidebar-header h1 {
-  margin: 0;
+.emoji-row .language-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+h1 {
+  margin: var(--spacing-sm) 0;
   font-size: 1.5rem;
   font-weight: 600;
   color: var(--text-color);
-  white-space: nowrap;
 }
 
 .section-divider {

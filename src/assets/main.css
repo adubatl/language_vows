@@ -121,7 +121,7 @@ body {
 }
 
 .sidebar-section {
-  margin: var(--spacing-lg) 0;
+  margin: var(--spacing-md) 0;
 }
 
 .sidebar-section h2 {

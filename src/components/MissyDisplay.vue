@@ -18,6 +18,7 @@ defineProps<{
           translateX(${position === Position.LEFT ? '-100%' : position === Position.RIGHT ? '100%' : '0'})
           rotateX(${rotation}deg)
         `,
+        borderColor: 'var(--accent-color, var(--icon-color))',
       }"
     />
   </div>
@@ -44,7 +45,7 @@ defineProps<{
   transform-style: preserve-3d;
   backface-visibility: visible;
   border-radius: 50%;
-  border: 3px solid var(--icon-color);
+  border: 3px solid var(--accent-color);
   object-fit: cover;
   aspect-ratio: 1;
 }

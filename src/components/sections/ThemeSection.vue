@@ -1,5 +1,5 @@
 <template>
-  <SidebarSection :icon="PaintBrushIcon" title="Theme">
+  <SidebarSection :icon="sectionIcon" title="Theme">
     <div class="theme-name">{{ currentTheme.name }}</div>
     <button class="test-button" @click="generateNewTheme">Generate Random Theme</button>
     <button class="test-button" @click="resetTheme">Reset Theme</button>
@@ -32,8 +32,9 @@
 <script setup lang="ts">
 import { useThemeStore } from '../../stores/theme'
 import { storeToRefs } from 'pinia'
-import { PaintBrushIcon } from '@heroicons/vue/24/outline'
 import SidebarSection from './SidebarSection.vue'
+
+const sectionIcon = 'material-symbols:palette-outline'
 
 const themeStore = useThemeStore()
 const { currentTheme } = storeToRefs(themeStore)

@@ -2,6 +2,7 @@ interface Theme {
   name: string
   background: string
   text: string
+  accent: string
 }
 
 // Helper function to calculate relative luminance
@@ -70,6 +71,17 @@ const nouns = ['Dawn', 'Dusk', 'Forest', 'Ocean', 'Galaxy', 'Mountain', 'Desert'
 
 export function generateRandomTheme(): Theme {
   const [bg, text] = generateAccessibleColors()
+  // Generate a random accent color that contrasts with the background
+  let accent = randomColor()
+  let contrastRatio = 0
+  while (contrastRatio < 3) {
+    // Using a lower contrast ratio for accent (3:1 instead of 4.5:1)
+    accent = randomColor()
+    const bgLuminance = getLuminance(...hexToRgb(bg))
+    const accentLuminance = getLuminance(...hexToRgb(accent))
+    contrastRatio = getContrastRatio(bgLuminance, accentLuminance)
+  }
+
   const name = `${adjectives[Math.floor(Math.random() * adjectives.length)]} ${
     nouns[Math.floor(Math.random() * nouns.length)]
   }`
@@ -78,6 +90,7 @@ export function generateRandomTheme(): Theme {
     name,
     background: bg,
     text: text,
+    accent: accent,
   }
 }
 
@@ -87,5 +100,6 @@ export const defaultThemes: Theme[] = [
     name: 'Base Theme',
     background: 'var(--bg-color)', // Your current background color
     text: 'var(--text-color)', // Your current text color
+    accent: 'var(--accent-color)',
   },
 ]

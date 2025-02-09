@@ -10,6 +10,7 @@ const outputContent = ref('')
 const currentRotation = ref(0)
 const displayMode = ref(0)
 const position = ref(Position.CENTER)
+const currentLanguage = ref<Language | undefined>()
 
 /**
  * State machine so Missy can show off her moves
@@ -94,8 +95,8 @@ async function handleCreate(newVow: { text: string; language: LanguageVow['langu
 
     if (!response.ok) throw new Error('Failed to create vow')
 
-    // Refresh the vows list
     await fetchVows()
+    currentLanguage.value = vow.language
     outputContent.value = `✨ Created new vow:\n${vow.text}`
   } catch (error) {
     console.error('Error creating vow:', error)
@@ -109,7 +110,8 @@ async function handleRead(vowId: string) {
     if (!response.ok) throw new Error('Failed to fetch vow')
 
     const vow = await response.json()
-    outputContent.value = `📖 Reading vow:\n${vow.text}\nLanguage: ${vow.language}`
+    currentLanguage.value = vow.language
+    outputContent.value = `📖 Reading vow:\n${vow.text}`
   } catch (error) {
     console.error('Error reading vow:', error)
     outputContent.value = '❌ Failed to read vow'
@@ -118,6 +120,7 @@ async function handleRead(vowId: string) {
 
 async function handleUpdate(update: { id: string; text: string }) {
   try {
+    const vow = vows.value.find((v) => v.id === update.id)
     const response = await fetch(`${API_BASE_URL}/vows/${update.id}`, {
       method: 'PUT',
       headers: {
@@ -128,8 +131,8 @@ async function handleUpdate(update: { id: string; text: string }) {
 
     if (!response.ok) throw new Error('Failed to update vow')
 
-    // Refresh the vows list
     await fetchVows()
+    currentLanguage.value = vow?.language
     outputContent.value = `📝 Updated vow:\n${update.text}`
   } catch (error) {
     console.error('Error updating vow:', error)
@@ -146,8 +149,8 @@ async function handleDelete(vowId: string) {
 
     if (!response.ok) throw new Error('Failed to delete vow')
 
-    // Refresh the vows list
     await fetchVows()
+    currentLanguage.value = vow?.language
     outputContent.value = vow ? `🗑️ Deleted vow:\n${vow.text}` : '🗑️ Vow deleted'
   } catch (error) {
     console.error('Error deleting vow:', error)
@@ -176,7 +179,7 @@ onMounted(() => {
     />
     <div class="right-panel">
       <MissyDisplay :rotation="currentRotation" :position="position" />
-      <CodeOutput :content="outputContent" />
+      <CodeOutput :content="outputContent" :language="currentLanguage" />
     </div>
   </div>
 </template>
