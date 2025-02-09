@@ -1,12 +1,37 @@
 <script setup lang="ts">
-defineProps<{
+import { ref, watch } from 'vue'
+
+const props = defineProps<{
   content: string
 }>()
+
+const outputContent = ref('')
+
+// Watch for new content and append it with timestamp
+watch(
+  () => props.content,
+  (newContent) => {
+    if (newContent) {
+      const timestamp = new Date().toLocaleTimeString()
+      outputContent.value += `[${timestamp}] ${newContent}\n`
+    }
+  },
+)
+
+const clearOutput = () => {
+  outputContent.value = ''
+}
 </script>
 
 <template>
   <div class="code-container">
-    <pre class="code-output">{{ content }}</pre>
+    <div class="code-header">
+      <span class="output-length">{{ outputContent.split('\n').length - 1 }} lines</span>
+      <button class="clear-button" @click="clearOutput">Clear</button>
+    </div>
+    <pre class="code-output" :class="{ empty: !outputContent }">{{
+      outputContent || 'No output yet...'
+    }}</pre>
   </div>
 </template>
 
@@ -15,7 +40,42 @@ defineProps<{
   width: 100%;
   height: 75%;
   padding: var(--spacing-lg);
-  display: block;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  max-width: calc(100vw - var(--sidebar-width));
+}
+
+.code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+.output-length {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.clear-button {
+  background-color: var(--button-bg);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: var(--spacing-sm) var(--spacing-md);
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.clear-button:hover {
+  background-color: var(--button-hover);
+  transform: translateY(-1px);
+}
+
+.clear-button:active {
+  transform: translateY(0);
 }
 
 .code-output {
@@ -25,8 +85,16 @@ defineProps<{
   white-space: pre-wrap;
   font-family: monospace;
   width: 100%;
-  height: 100%;
+  flex-grow: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   margin: 0;
+  border: 1px solid var(--border-color);
+  box-sizing: border-box;
+}
+
+.code-output.empty {
+  color: var(--text-muted);
+  font-style: italic;
 }
 </style>

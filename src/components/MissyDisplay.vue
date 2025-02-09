@@ -43,5 +43,9 @@ defineProps<{
   transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   transform-style: preserve-3d;
   backface-visibility: visible;
+  border-radius: 50%;
+  border: 3px solid var(--icon-color);
+  object-fit: cover;
+  aspect-ratio: 1;
 }
 </style>

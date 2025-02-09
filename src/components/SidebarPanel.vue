@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import type { LanguageVow, Language } from '@/types/vow'
 import {
   PlusCircleIcon,
@@ -50,6 +50,7 @@ function handleCreate() {
     text: randomVow.text,
     language: selectedLanguage.value,
   })
+  emit('missy-moves')
 
   // Clear the selection
   selectedLanguage.value = 'typescript'
@@ -61,12 +62,14 @@ function handleUpdate() {
       id: selectedUpdateVow.value,
       text: updateVowText.value,
     })
+    emit('missy-moves')
   }
 }
 
 function handleRead() {
   if (selectedReadVow.value) {
     emit('read', selectedReadVow.value)
+    emit('missy-moves')
     selectedReadVow.value = ''
   }
 }
@@ -74,6 +77,7 @@ function handleRead() {
 function handleDelete() {
   if (selectedDeleteVow.value) {
     emit('delete', selectedDeleteVow.value)
+    emit('missy-moves')
     selectedDeleteVow.value = ''
     updateVowText.value = ''
   }
@@ -98,6 +102,24 @@ function truncateText(text: string, maxLength: number) {
   }
   return `${text.slice(0, maxLength)}...`
 }
+
+// Watch for changes in vows array
+watch(
+  () => props.vows,
+  (newVows) => {
+    // Reset selections if their vow no longer exists
+    if (selectedReadVow.value && !newVows.find((v) => v.id === selectedReadVow.value)) {
+      selectedReadVow.value = ''
+    }
+    if (selectedUpdateVow.value && !newVows.find((v) => v.id === selectedUpdateVow.value)) {
+      selectedUpdateVow.value = ''
+      updateVowText.value = ''
+    }
+    if (selectedDeleteVow.value && !newVows.find((v) => v.id === selectedDeleteVow.value)) {
+      selectedDeleteVow.value = ''
+    }
+  },
+)
 </script>
 
 <template>
@@ -105,6 +127,7 @@ function truncateText(text: string, maxLength: number) {
     <div class="sidebar-header">
       <span class="emoji">🙏</span>
       <h1>Language Vows</h1>
+      <span class="emoji">🙏</span>
     </div>
 
     <div class="sidebar-section">
@@ -199,6 +222,7 @@ function truncateText(text: string, maxLength: number) {
 .sidebar-header {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: var(--spacing-md);
   margin-bottom: var(--spacing-xl);
 }
@@ -212,6 +236,7 @@ function truncateText(text: string, maxLength: number) {
   font-size: 1.5rem;
   font-weight: 600;
   color: var(--text-color);
+  white-space: nowrap;
 }
 
 .sidebar-section {
@@ -222,8 +247,9 @@ function truncateText(text: string, maxLength: number) {
   font-size: 0.875rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #666;
+  color: var(--icon-color);
   margin: 0 0 var(--spacing-md) 0;
+  font-weight: 600;
 }
 
 .section-divider {
@@ -292,7 +318,7 @@ function truncateText(text: string, maxLength: number) {
 .section-icon {
   width: 1.25rem;
   height: 1.25rem;
-  color: #666;
+  color: var(--icon-color);
   flex-shrink: 0;
 }
 

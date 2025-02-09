@@ -1,5 +1,32 @@
 /* color palette from <https://github.com/vuejs/theme> */
 :root {
+  /* Our custom theme colors */
+  --bg-color: #1a463c;
+  --text-color: #e0e0e0;
+  --button-bg: #245a4d;
+  --button-hover: #2d6e5f;
+  --border-color: #2d6e5f;
+  --code-bg: #1d4e43;
+  --icon-color: #93cf85;
+  --text-muted: #93cf85;
+
+  /* Layout variables */
+  --sidebar-width: 300px;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+
+  /* semantic mappings */
+  --color-background: var(--bg-color);
+  --color-background-soft: var(--button-bg);
+  --color-background-mute: var(--code-bg);
+  --color-border: var(--border-color);
+  --color-border-hover: var(--button-hover);
+  --color-heading: var(--text-color);
+  --color-text: var(--text-color);
+  --section-gap: 160px;
+
   --vt-c-white: #ffffff;
   --vt-c-white-soft: #f8f8f8;
   --vt-c-white-mute: #f2f2f2;
@@ -19,35 +46,6 @@
   --vt-c-text-light-2: rgba(60, 60, 60, 0.66);
   --vt-c-text-dark-1: var(--vt-c-white);
   --vt-c-text-dark-2: rgba(235, 235, 235, 0.64);
-}
-
-/* semantic color variables for this project */
-:root {
-  --color-background: var(--vt-c-white);
-  --color-background-soft: var(--vt-c-white-soft);
-  --color-background-mute: var(--vt-c-white-mute);
-
-  --color-border: var(--vt-c-divider-light-2);
-  --color-border-hover: var(--vt-c-divider-light-1);
-
-  --color-heading: var(--vt-c-text-light-1);
-  --color-text: var(--vt-c-text-light-1);
-
-  --section-gap: 160px;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-background: var(--vt-c-black);
-    --color-background-soft: var(--vt-c-black-soft);
-    --color-background-mute: var(--vt-c-black-mute);
-
-    --color-border: var(--vt-c-divider-dark-2);
-    --color-border-hover: var(--vt-c-divider-dark-1);
-
-    --color-heading: var(--vt-c-text-dark-1);
-    --color-text: var(--vt-c-text-dark-2);
-  }
 }
 
 *,

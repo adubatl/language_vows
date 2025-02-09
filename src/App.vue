@@ -182,23 +182,6 @@ onMounted(() => {
 </template>
 
 <style>
-/* Global styles and CSS variables */
-:root {
-  --bg-color: #1a1a1a;
-  --text-color: #e0e0e0;
-  --button-bg: #2c2c2c;
-  --button-hover: #3c3c3c;
-  --border-color: #333;
-  --code-bg: #2a2a2a;
-  --sidebar-width: 25%;
-  --spacing-sm: 0.5rem;
-  --spacing-md: 1rem;
-  --spacing-lg: 1.5rem;
-  --spacing-xl: 2rem;
-  --spin-direction: normal;
-  --rotation: 0deg;
-}
-
 body {
   background-color: var(--bg-color);
   color: var(--text-color);
