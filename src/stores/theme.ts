@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
-import { generateRandomTheme, defaultThemes } from '../utils/theme'
-import type { Theme } from '../utils/theme'
+import { generateRandomTheme } from '../utils/theme'
+import type { Theme } from '@/types'
 
 function hexToRgb(hex: string): [number, number, number] {
   const cleanHex = hex.replace('#', '')
@@ -39,6 +39,7 @@ export const useThemeStore = defineStore('theme', {
   state: () => ({
     currentTheme: {
       name: 'Base Theme',
+      description: 'A base theme with a light background and dark text',
       background:
         getComputedStyle(document.documentElement).getPropertyValue('--bg-color').trim() ||
         '#1a1a1a',
@@ -51,6 +52,7 @@ export const useThemeStore = defineStore('theme', {
     } as Theme,
     baseTheme: {
       name: 'Base Theme',
+      description: 'A base theme with a light background and dark text',
       background:
         getComputedStyle(document.documentElement).getPropertyValue('--bg-color').trim() ||
         '#1a1a1a',
@@ -61,6 +63,7 @@ export const useThemeStore = defineStore('theme', {
         getComputedStyle(document.documentElement).getPropertyValue('--icon-color').trim() ||
         '#93cf85',
     } as Theme,
+    isGenerating: false,
   }),
 
   actions: {
@@ -96,6 +99,37 @@ export const useThemeStore = defineStore('theme', {
 
     resetTheme() {
       this.setTheme(this.baseTheme)
+    },
+
+    async generateAITheme(prompt?: string) {
+      console.log(
+        `Starting AI generation, setting isGenerating to true ${new Date().toISOString()}`,
+      )
+      this.isGenerating = true
+      try {
+        const response = await fetch('http://localhost:8080/api/themes/generate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ prompt: prompt || 'Generate a unique theme' }),
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to generate AI theme')
+        }
+
+        const aiTheme = await response.json()
+        this.setTheme(aiTheme)
+      } catch (error) {
+        console.error('Error generating AI theme:', error)
+        this.generateNewTheme()
+      } finally {
+        console.log(
+          `Finishing AI generation, setting isGenerating to false ${new Date().toISOString()}`,
+        )
+        this.isGenerating = false
+      }
     },
   },
 })

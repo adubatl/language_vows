@@ -24,6 +24,7 @@ func NewRouter(database *db.Database) *chi.Mux {
 	// Routes
 	r.Route("/api", func(r chi.Router) {
 		r.Mount("/vows", vowsResource{db: database}.Routes())
+		r.Mount("/themes", themesResource{}.Routes())
 	})
 
 	return r

@@ -1,9 +1,4 @@
-interface Theme {
-  name: string
-  background: string
-  text: string
-  accent: string
-}
+import type { Theme } from '@/types'
 
 // Helper function to calculate relative luminance
 function getLuminance(r: number, g: number, b: number): number {
@@ -22,7 +17,7 @@ function getContrastRatio(l1: number, l2: number): number {
 }
 
 // Convert hex to RGB
-function hexToRgb(hex: string): number[] {
+function hexToRgb(hex: string): [number, number, number] {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
   return result
     ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)]
@@ -42,7 +37,7 @@ function randomColor(): string {
 // Generate an accessible color pair
 function generateAccessibleColors(): [string, string] {
   const backgroundColor = randomColor()
-  let textColor: string
+  let textColor: string = ''
   let contrastRatio = 0
 
   // Keep trying until we get a good contrast ratio (WCAG AA requires 4.5:1)
@@ -71,11 +66,9 @@ const nouns = ['Dawn', 'Dusk', 'Forest', 'Ocean', 'Galaxy', 'Mountain', 'Desert'
 
 export function generateRandomTheme(): Theme {
   const [bg, text] = generateAccessibleColors()
-  // Generate a random accent color that contrasts with the background
   let accent = randomColor()
   let contrastRatio = 0
   while (contrastRatio < 3) {
-    // Using a lower contrast ratio for accent (3:1 instead of 4.5:1)
     accent = randomColor()
     const bgLuminance = getLuminance(...hexToRgb(bg))
     const accentLuminance = getLuminance(...hexToRgb(accent))
@@ -88,18 +81,19 @@ export function generateRandomTheme(): Theme {
 
   return {
     name,
+    description: 'random theme generated at ' + new Date().toISOString(),
     background: bg,
     text: text,
     accent: accent,
   }
 }
 
-// Some preset themes that we know are accessible
 export const defaultThemes: Theme[] = [
   {
     name: 'Base Theme',
-    background: 'var(--bg-color)', // Your current background color
-    text: 'var(--text-color)', // Your current text color
+    description: 'A base theme with a light background and dark text',
+    background: 'var(--bg-color)',
+    text: 'var(--text-color)',
     accent: 'var(--accent-color)',
   },
 ]

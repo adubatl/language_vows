@@ -1,6 +1,6 @@
 module language_vows
 
-go 1.23.6
+go 1.21
 
 require (
 	github.com/go-chi/chi/v5 v5.2.1

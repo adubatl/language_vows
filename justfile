@@ -2,6 +2,26 @@
 default:
     @just --list
 
+# Start all services with Docker Compose
+up:
+    docker compose up -d
+
+# Stop all services
+down:
+    docker compose down
+
+# Show logs for all services
+logs:
+    docker compose logs -f
+
+# Show logs for a specific service
+service-logs service:
+    docker compose logs -f {{service}}
+
+# Pull the Mistral model for Ollama
+ollama-pull:
+    docker compose exec ollama ollama pull mistral
+
 # Start up the frontend
 frontend-up:
     npm run dev
@@ -48,7 +68,7 @@ db-init:
 go-run:
     ./scripts/go-run.sh
 
-# Start everything (database + backend)
+# Start everything (legacy method - prefer 'just up')
 start:
     just db-up
     just go-run
