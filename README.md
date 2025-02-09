@@ -98,5 +98,3 @@ The application should now be running at http://localhost:5173
 - `just db-clear` - Clear all vows
 - `just db-backup [type]` - Backup database
 - `just db-init-all` - Initialize schema and seed data
-
-## Project Structure
