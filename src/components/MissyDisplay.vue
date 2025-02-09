@@ -15,7 +15,7 @@ defineProps<{
       src="@/assets/image.webp"
       :style="{
         transform: `
-          translateX(${position === Position.LEFT ? '-75%' : position === Position.RIGHT ? '75%' : '0'})
+          translateX(${position === Position.LEFT ? '-100%' : position === Position.RIGHT ? '100%' : '0'})
           rotateX(${rotation}deg)
         `,
       }"

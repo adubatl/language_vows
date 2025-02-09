@@ -16,7 +16,7 @@ import { ref } from 'vue'
 import { TrashIcon } from '@heroicons/vue/24/outline'
 import { CodeBracketIcon, CubeIcon, BeakerIcon } from '@heroicons/vue/24/solid'
 import type { LanguageVow } from '@/types/vow'
-import SidebarSection from '../SidebarSection.vue'
+import SidebarSection from './SidebarSection.vue'
 
 defineProps<{
   vows: LanguageVow[]

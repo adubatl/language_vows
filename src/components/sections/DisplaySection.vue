@@ -6,7 +6,7 @@
 
 <script setup lang="ts">
 import { ComputerDesktopIcon as DisplayIcon } from '@heroicons/vue/24/outline'
-import SidebarSection from '../SidebarSection.vue'
+import SidebarSection from './SidebarSection.vue'
 
 defineProps<{
   displayText: string

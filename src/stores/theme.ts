@@ -2,6 +2,39 @@ import { defineStore } from 'pinia'
 import { generateRandomTheme, defaultThemes } from '../utils/theme'
 import type { Theme } from '../utils/theme'
 
+function hexToRgb(hex: string): [number, number, number] {
+  const cleanHex = hex.replace('#', '')
+  const r = parseInt(cleanHex.slice(0, 2), 16)
+  const g = parseInt(cleanHex.slice(2, 4), 16)
+  const b = parseInt(cleanHex.slice(4, 6), 16)
+  return [r, g, b]
+}
+
+function getLuminance(r: number, g: number, b: number): number {
+  // Convert RGB to relative luminance using the formula from WCAG 2.0
+  const [rr, gg, bb] = [r, g, b].map((c) => {
+    const s = c / 255
+    return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4)
+  })
+  return 0.2126 * rr + 0.7152 * gg + 0.0722 * bb
+}
+
+function adjustColor(color: string, amount: number): string {
+  // Convert hex to RGB
+  const hex = color.replace('#', '')
+  const r = parseInt(hex.slice(0, 2), 16)
+  const g = parseInt(hex.slice(2, 4), 16)
+  const b = parseInt(hex.slice(4, 6), 16)
+
+  // Darken each component
+  const newR = Math.max(0, Math.min(255, r + amount))
+  const newG = Math.max(0, Math.min(255, g + amount))
+  const newB = Math.max(0, Math.min(255, b + amount))
+
+  // Convert back to hex
+  return `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`
+}
+
 export const useThemeStore = defineStore('theme', {
   state: () => ({
     currentTheme: {
@@ -31,15 +64,21 @@ export const useThemeStore = defineStore('theme', {
       document.documentElement.style.setProperty('--bg-color', theme.background)
       document.documentElement.style.setProperty('--text-color', theme.text)
 
-      // Update other related variables to maintain consistency
+      // Calculate and set hover color (darken for light backgrounds, lighten for dark ones)
+      const isLightBackground = getLuminance(...hexToRgb(theme.background)) > 0.5
+      const hoverColor = adjustColor(theme.background, isLightBackground ? -16 : 16)
+
+      // Update other related variables
       document.documentElement.style.setProperty('--button-bg', theme.background)
+      document.documentElement.style.setProperty('--button-hover', hoverColor)
+
+      // Use text color with opacity for borders and dividers
+      document.documentElement.style.setProperty('--border-color', `${theme.text}33`) // 20% opacity
+      document.documentElement.style.setProperty('--divider-color', `${theme.text}1a`) // 10% opacity
+
       document.documentElement.style.setProperty(
-        '--button-hover',
-        theme.background === '#ffffff' ? '#f0f0f0' : '#2a2a2a',
-      )
-      document.documentElement.style.setProperty(
-        '--border-color',
-        theme.background === '#ffffff' ? '#e0e0e0' : '#333333',
+        '--code-bg',
+        isLightBackground ? adjustColor(theme.background, -8) : adjustColor(theme.background, 8),
       )
     },
 

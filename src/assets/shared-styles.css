@@ -30,9 +30,37 @@
   font-style: italic;
 }
 
+.test-button {
+  width: 100%;
+  padding: var(--spacing-md);
+  background-color: var(--button-bg);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  margin-top: var(--spacing-sm);
+}
+
+.test-button:hover {
+  background-color: var(--button-hover);
+  transform: translateY(-1px);
+}
+
+.test-button:active {
+  transform: translateY(0);
+}
+
 .language-icon {
   width: 1rem;
   height: 1rem;
   margin-right: var(--spacing-sm);
   vertical-align: middle;
+}
+
+.section-divider {
+  border: none;
+  border-top: 1px solid var(--divider-color);
+  margin: var(--spacing-md) 0;
 }

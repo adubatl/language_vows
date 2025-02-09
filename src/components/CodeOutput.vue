@@ -54,14 +54,15 @@ const clearOutput = () => {
 }
 
 .output-length {
-  color: var(--text-muted);
+  color: var(--text-color);
+  opacity: 0.7;
   font-size: 0.9rem;
 }
 
 .clear-button {
   background-color: var(--button-bg);
   color: var(--text-color);
-  border: 1px solid var(--border-color);
+  border: 2px solid var(--border-color);
   border-radius: 4px;
   padding: var(--spacing-sm) var(--spacing-md);
   cursor: pointer;
@@ -80,6 +81,7 @@ const clearOutput = () => {
 
 .code-output {
   background-color: var(--code-bg);
+  color: var(--text-color);
   padding: var(--spacing-lg);
   border-radius: 4px;
   white-space: pre-wrap;
@@ -94,7 +96,7 @@ const clearOutput = () => {
 }
 
 .code-output.empty {
-  color: var(--text-muted);
+  opacity: 0.7;
   font-style: italic;
 }
 </style>

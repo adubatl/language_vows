@@ -33,7 +33,7 @@
 import { useThemeStore } from '../../stores/theme'
 import { storeToRefs } from 'pinia'
 import { PaintBrushIcon } from '@heroicons/vue/24/outline'
-import SidebarSection from '../SidebarSection.vue'
+import SidebarSection from './SidebarSection.vue'
 
 const themeStore = useThemeStore()
 const { currentTheme } = storeToRefs(themeStore)

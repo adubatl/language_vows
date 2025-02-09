@@ -16,7 +16,7 @@ import { PlusCircleIcon } from '@heroicons/vue/24/outline'
 import { CodeBracketIcon, CubeIcon, BeakerIcon } from '@heroicons/vue/24/solid'
 import type { Language } from '@/types/vow'
 import { TYPESCRIPT_VOWS, GO_VOWS, PYTHON_VOWS } from '@/constants/vows'
-import SidebarSection from '../SidebarSection.vue'
+import SidebarSection from './SidebarSection.vue'
 import '@/assets/shared-styles.css'
 
 const emit = defineEmits(['create', 'missy-moves'])
