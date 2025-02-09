@@ -1,23 +1,24 @@
 <template>
   <div
     class="vow-select"
-    :class="{ open: isOpen }"
+    :class="{ open: isOpen, disabled: !vows?.length }"
     @mouseleave="startCloseTimer"
     @mouseenter="cancelCloseTimer"
   >
-    <div class="selected" @click="isOpen = !isOpen">
+    <div
+      class="selected"
+      :data-test="`vow-select-${vows?.length ? 'active' : 'disabled'}`"
+      @click="handleClick"
+    >
       <div class="selected-content">
-        <template v-if="modelValue">
+        <template v-if="modelValue && selectedVow">
           <div class="vow-option">
-            <Icon
-              :icon="languageIcons[selectedVow?.language || 'typescript']"
-              class="language-icon"
-            />
-            <span>{{ truncateText(selectedVow?.text || '', 30) }}</span>
+            <Icon :icon="languageIcons[selectedVow.language]" class="language-icon" />
+            <span>{{ truncateText(selectedVow.text, 30) }}</span>
           </div>
         </template>
         <template v-else>
-          <span class="placeholder">Select a vow</span>
+          <span class="placeholder">{{ vows?.length ? 'Select a vow' : 'No vows available' }}</span>
         </template>
       </div>
       <Icon
@@ -26,8 +27,19 @@
         :class="{ open: isOpen }"
       />
     </div>
-    <div v-if="isOpen" class="options" @mouseleave="startCloseTimer" @mouseenter="cancelCloseTimer">
-      <div v-for="vow in vows" :key="vow.id" class="vow-option" @click="selectVow(vow.id)">
+    <div
+      v-if="isOpen && vows?.length"
+      class="options"
+      @mouseleave="startCloseTimer"
+      @mouseenter="cancelCloseTimer"
+    >
+      <div
+        v-for="vow in vows"
+        :key="vow.id"
+        class="vow-option"
+        :data-test="`vow-option-${vow.language}`"
+        @click="selectVow(vow.id)"
+      >
         <Icon :icon="languageIcons[vow.language]" class="language-icon" />
         <span>{{ truncateText(vow.text, 30) }}</span>
       </div>
@@ -36,18 +48,38 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, inject, watch } from 'vue'
 import { Icon } from '@iconify/vue'
-import type { LanguageVow } from '@/types/vow'
+import type { VowsArray } from '@/types/vow'
 
 const props = defineProps<{
   modelValue: string
-  vows: LanguageVow[]
+  vows: VowsArray
 }>()
 
 const emit = defineEmits(['update:modelValue', 'change'])
 
 const isOpen = ref(false)
+const resetSelects = inject('resetSelects', () => {})
+
+// Reset state when any action occurs
+watch(
+  () => resetSelects(),
+  () => {
+    isOpen.value = false
+    emit('update:modelValue', '')
+  },
+)
+
+// Add watch for vows changes
+watch(
+  () => props.vows,
+  () => {
+    // Reset state when vows change
+    isOpen.value = false
+    emit('update:modelValue', '')
+  },
+)
 
 const languageIcons = {
   typescript: 'logos:typescript-icon',
@@ -55,7 +87,7 @@ const languageIcons = {
   python: 'logos:python',
 }
 
-const selectedVow = computed(() => props.vows.find((vow) => vow.id === props.modelValue))
+const selectedVow = computed(() => props.vows?.find((vow) => vow.id === props.modelValue))
 
 function selectVow(id: string) {
   emit('update:modelValue', id)
@@ -88,6 +120,12 @@ function cancelCloseTimer() {
   if (closeTimeout.value !== null) {
     clearTimeout(closeTimeout.value)
     closeTimeout.value = null
+  }
+}
+
+function handleClick() {
+  if (props.vows?.length) {
+    isOpen.value = !isOpen.value
   }
 }
 
@@ -174,5 +212,14 @@ onUnmounted(() => {
 
 .chevron.open {
   transform: rotate(180deg);
+}
+
+.vow-select.disabled .selected {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.vow-select.disabled .chevron {
+  display: none;
 }
 </style>

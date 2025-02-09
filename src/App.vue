@@ -4,7 +4,7 @@ import SidebarPanel from '@/components/SidebarPanel.vue'
 import MissyDisplay from '@/components/MissyDisplay.vue'
 import CodeOutput from '@/components/CodeOutput.vue'
 import { DisplayMode, Position } from '@/constants/missy'
-import type { LanguageVow } from '@/types/vow'
+import type { LanguageVow, VowsArray, Language } from '@/types/vow'
 
 const outputContent = ref('')
 const currentRotation = ref(0)
@@ -58,7 +58,7 @@ function handleMissyMoves() {
   displayMode.value = (displayMode.value + 1) % 3
 }
 
-const vows = ref<LanguageVow[]>([])
+const vows = ref<VowsArray>([])
 const API_BASE_URL = 'http://localhost:8080/api'
 
 async function fetchVows() {
@@ -120,7 +120,7 @@ async function handleRead(vowId: string) {
 
 async function handleUpdate(update: { id: string; text: string }) {
   try {
-    const vow = vows.value.find((v) => v.id === update.id)
+    const vow = vows.value?.find((v) => v.id === update.id)
     const response = await fetch(`${API_BASE_URL}/vows/${update.id}`, {
       method: 'PUT',
       headers: {
@@ -142,7 +142,7 @@ async function handleUpdate(update: { id: string; text: string }) {
 
 async function handleDelete(vowId: string) {
   try {
-    const vow = vows.value.find((v) => v.id === vowId)
+    const vow = vows.value?.find((v) => v.id === vowId)
     const response = await fetch(`${API_BASE_URL}/vows/${vowId}`, {
       method: 'DELETE',
     })

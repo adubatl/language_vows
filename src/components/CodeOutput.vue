@@ -46,9 +46,14 @@ const clearOutput = () => {
       <span class="output-length">{{ outputLines.length }} lines</span>
       <button class="clear-button" @click="clearOutput">Clear</button>
     </div>
-    <div class="code-output" :class="{ empty: !outputLines.length }">
+    <div class="code-output" :class="{ empty: !outputLines.length }" data-test="code-output">
       <template v-if="outputLines.length">
-        <div v-for="(line, index) in outputLines" :key="index" class="output-line">
+        <div
+          v-for="(line, index) in outputLines"
+          :key="index"
+          class="output-line"
+          :data-test="`output-line-${line.language}`"
+        >
           <span class="timestamp">[{{ line.timestamp }}]</span>
           <Icon :icon="languageIcons[line.language]" class="output-icon" />
           <span class="content">{{ line.content }}</span>

@@ -38,9 +38,6 @@ ALTER TABLE public.vows OWNER TO postgres;
 --
 
 COPY public.vows (id, text, language) FROM stdin;
-typescript-vg1yi9ihi	I shall never let implicit 'any' darken my codebase	typescript
-typescript-7yqgpea7b	I solemnly swear to never use 'any' as a type escape hatch	typescript
-typescript-ml98isvd6	I pledge to always define return types for public functions	typescript
 \.
 
 

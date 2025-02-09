@@ -1,6 +1,8 @@
 <template>
   <SidebarSection :icon="sectionIcon" title="Display">
-    <button class="test-button" @click="$emit('missy-moves')">{{ displayText }}</button>
+    <button class="test-button" data-test="display-action-button" @click="$emit('missy-moves')">
+      {{ displayText }}
+    </button>
   </SidebarSection>
 </template>
 

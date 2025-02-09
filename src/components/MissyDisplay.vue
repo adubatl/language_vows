@@ -12,6 +12,7 @@ defineProps<{
     <img
       alt="Vue missy"
       class="missy"
+      data-test="missy-image"
       src="@/assets/image.webp"
       :style="{
         transform: `

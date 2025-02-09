@@ -15,7 +15,7 @@ func NewRouter(database *db.Database) *chi.Mux {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:5173"}, // Your Vue dev server
+		AllowedOrigins:   []string{"http://localhost:5173", "http://localhost:4173"}, // Added test server port
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
 		AllowCredentials: true,

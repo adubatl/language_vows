@@ -5,6 +5,7 @@
         v-for="lang in languages"
         :key="lang"
         class="language-button"
+        :data-test="`create-${lang}-button`"
         @click="handleCreate(lang)"
       >
         <Icon :icon="languageIcons[lang]" class="language-icon" />
@@ -19,6 +20,7 @@ import type { Language } from '@/types/vow'
 import { TYPESCRIPT_VOWS, GO_VOWS, PYTHON_VOWS } from '@/constants/vows'
 import SidebarSection from './SidebarSection.vue'
 import '@/assets/shared-styles.css'
+import { inject } from 'vue'
 
 const emit = defineEmits(['create', 'missy-moves'])
 
@@ -31,6 +33,8 @@ const languageIcons = {
 }
 
 const sectionIcon = 'material-symbols:add-circle-outline'
+
+const resetSelects = inject('resetSelects', () => {})
 
 function handleCreate(language: Language) {
   const languageVows = {
@@ -46,6 +50,7 @@ function handleCreate(language: Language) {
     language,
   })
   emit('missy-moves')
+  resetSelects()
 }
 </script>
 

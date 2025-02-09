@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, provide } from 'vue'
 import { Icon } from '@iconify/vue'
-import type { LanguageVow } from '@/types/vow'
+import type { VowsArray } from '@/types/vow'
 
 import ThemeSection from './sections/ThemeSection.vue'
 import DisplaySection from './sections/DisplaySection.vue'
@@ -12,7 +12,7 @@ import DeleteSection from './sections/DeleteSection.vue'
 
 const props = defineProps<{
   displayText: string
-  vows: LanguageVow[]
+  vows: VowsArray
 }>()
 
 const updateVowText = ref('')
@@ -20,19 +20,28 @@ const selectedReadVow = ref<string>('')
 const selectedUpdateVow = ref<string>('')
 const selectedDeleteVow = ref<string>('')
 
+// Create a symbol for the reset function
+const RESET_SELECTS = Symbol('resetSelects')
+
+// Create and provide the reset function
+const resetTrigger = ref(0)
+provide(RESET_SELECTS, () => {
+  resetTrigger.value++
+})
+
 // Watch for changes in vows array
 watch(
   () => props.vows,
   (newVows) => {
     // Reset selections if their vow no longer exists
-    if (selectedReadVow.value && !newVows.find((v) => v.id === selectedReadVow.value)) {
+    if (selectedReadVow.value && !newVows?.find((v) => v.id === selectedReadVow.value)) {
       selectedReadVow.value = ''
     }
-    if (selectedUpdateVow.value && !newVows.find((v) => v.id === selectedUpdateVow.value)) {
+    if (selectedUpdateVow.value && !newVows?.find((v) => v.id === selectedUpdateVow.value)) {
       selectedUpdateVow.value = ''
       updateVowText.value = ''
     }
-    if (selectedDeleteVow.value && !newVows.find((v) => v.id === selectedDeleteVow.value)) {
+    if (selectedDeleteVow.value && !newVows?.find((v) => v.id === selectedDeleteVow.value)) {
       selectedDeleteVow.value = ''
     }
   },
@@ -47,7 +56,7 @@ watch(
         <Icon icon="logos:python" class="language-icon" />
         <span>🙏</span>
       </div>
-      <h1>🙏 Vow Maker 🙏</h1>
+      <h1>🙏 Language Vows 🙏</h1>
       <div class="emoji-row">
         <Icon icon="logos:typescript-icon" class="language-icon" />
         <span>🙏</span>
@@ -98,7 +107,6 @@ watch(
   flex-direction: column;
   text-align: center;
   margin-bottom: var(--spacing-lg);
-  padding: var(--spacing-md);
 }
 
 .emoji-row {

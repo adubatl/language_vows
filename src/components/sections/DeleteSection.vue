@@ -6,13 +6,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import type { LanguageVow } from '@/types/vow'
+import { ref, inject } from 'vue'
+import type { VowsArray } from '@/types/vow'
 import SidebarSection from './SidebarSection.vue'
 import VowSelect from '@/components/VowSelect.vue'
 
 defineProps<{
-  vows: LanguageVow[]
+  vows: VowsArray
 }>()
 
 const emit = defineEmits(['delete', 'missy-moves'])
@@ -21,11 +21,13 @@ const selectedDeleteVow = ref<string>('')
 
 const sectionIcon = 'material-symbols:delete-outline'
 
+const resetSelects = inject('resetSelects', () => {})
+
 function handleDelete() {
   if (selectedDeleteVow.value) {
     emit('delete', selectedDeleteVow.value)
     emit('missy-moves')
-    selectedDeleteVow.value = ''
+    resetSelects()
   }
 }
 
