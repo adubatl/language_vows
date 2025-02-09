@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { Position } from '@/constants/missy'
+
 defineProps<{
   rotation: number
-  position: 'left' | 'center' | 'right'
+  position: Position
 }>()
 </script>
 
@@ -13,7 +15,7 @@ defineProps<{
       src="@/assets/image.webp"
       :style="{
         transform: `
-          translateX(${position === 'left' ? '-75%' : position === 'right' ? '75%' : '0'})
+          translateX(${position === Position.LEFT ? '-75%' : position === Position.RIGHT ? '75%' : '0'})
           rotateX(${rotation}deg)
         `,
       }"

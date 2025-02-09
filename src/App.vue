@@ -1,50 +1,47 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import SidebarPanel from '@/components/SidebarPanel.vue'
 import MissyDisplay from '@/components/MissyDisplay.vue'
 import CodeOutput from '@/components/CodeOutput.vue'
-import { ALL_VOWS } from '@/constants/vows'
+import { DisplayMode, Position } from '@/constants/missy'
 import type { LanguageVow } from '@/types/vow'
 
 const outputContent = ref('')
 const currentRotation = ref(0)
 const displayMode = ref(0)
-const position = ref<'left' | 'center' | 'right'>('center')
+const position = ref(Position.CENTER)
 
-enum DisplayMode {
-  THROW_IT_BACK,
-  FLIP_IT,
-  REVERSE_IT,
-}
-
-const displayText = computed(() => {
-  switch (displayMode.value) {
-    case DisplayMode.THROW_IT_BACK:
-      return 'Throw it back'
-    case DisplayMode.FLIP_IT:
-      return 'Flip it'
-    case DisplayMode.REVERSE_IT:
-      return 'Reverse it'
-    default:
-      return 'Throw it back'
+/**
+ * State machine so Missy can show off her moves
+ * the display text is also the state name for ease of use
+ * @type {Record<number, { displayText: string, position: (currentPosition: string) => Position, rotation: number }>}
+ */
+const stateMachine: Record<
+  number,
+  {
+    displayText: string
+    position: (currentPosition: Position) => Position
+    rotation: number
   }
-})
-
-const stateMachine = {
+> = {
   [DisplayMode.THROW_IT_BACK]: {
     displayText: 'Throw it back',
-    position: (currentPosition: string) =>
-      currentPosition === 'center' ? 'left' : currentPosition === 'left' ? 'right' : 'left',
+    position: (currentPosition: Position) =>
+      currentPosition === Position.CENTER
+        ? Position.LEFT
+        : currentPosition === Position.LEFT
+          ? Position.RIGHT
+          : Position.LEFT,
     rotation: 0,
   },
   [DisplayMode.FLIP_IT]: {
     displayText: 'Flip it',
-    position: (currentPosition: string) => currentPosition,
+    position: (currentPosition: Position) => currentPosition,
     rotation: 180,
   },
   [DisplayMode.REVERSE_IT]: {
     displayText: 'Reverse it',
-    position: (currentPosition: string) => currentPosition,
+    position: (currentPosition: Position) => currentPosition,
     rotation: 0,
   },
 }
@@ -60,41 +57,110 @@ function handleMissyMoves() {
   displayMode.value = (displayMode.value + 1) % 3
 }
 
-const vows = ref<LanguageVow[]>(ALL_VOWS)
+const vows = ref<LanguageVow[]>([])
+const API_BASE_URL = 'http://localhost:8080/api'
 
-function handleCreate(newVow: { text: string; language: LanguageVow['language'] }) {
+async function fetchVows() {
+  try {
+    console.log('Fetching vows...')
+    const response = await fetch(`${API_BASE_URL}/vows`)
+    if (!response.ok) throw new Error('Failed to fetch vows')
+    console.log('Response:', response)
+    const data = await response.json()
+    console.log('Fetched vows:', data)
+    vows.value = data
+  } catch (error) {
+    console.error('Error fetching vows:', error)
+    outputContent.value = '❌ Failed to fetch vows from server'
+  }
+}
+
+async function handleCreate(newVow: { text: string; language: LanguageVow['language'] }) {
   const vow: LanguageVow = {
     text: newVow.text,
     language: newVow.language,
     id: `${newVow.language}-${Math.random().toString(36).substr(2, 9)}`,
   }
-  vows.value = [vow, ...vows.value]
-  outputContent.value = `✨ Created new vow:\n${vow.text}`
+
+  try {
+    console.log('Creating vow:', vow)
+    const response = await fetch(`${API_BASE_URL}/vows`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(vow),
+    })
+
+    if (!response.ok) throw new Error('Failed to create vow')
+
+    // Refresh the vows list
+    await fetchVows()
+    outputContent.value = `✨ Created new vow:\n${vow.text}`
+  } catch (error) {
+    console.error('Error creating vow:', error)
+    outputContent.value = '❌ Failed to create vow'
+  }
 }
 
-function handleRead(vowId: string) {
-  const vow = vows.value.find((v) => v.id === vowId)
-  if (vow) {
+async function handleRead(vowId: string) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/vows/${vowId}`)
+    if (!response.ok) throw new Error('Failed to fetch vow')
+
+    const vow = await response.json()
     outputContent.value = `📖 Reading vow:\n${vow.text}\nLanguage: ${vow.language}`
+  } catch (error) {
+    console.error('Error reading vow:', error)
+    outputContent.value = '❌ Failed to read vow'
   }
 }
 
-function handleUpdate(update: { id: string; text: string }) {
-  const index = vows.value.findIndex((v) => v.id === update.id)
-  if (index !== -1) {
-    vows.value[index] = { ...vows.value[index], text: update.text }
+async function handleUpdate(update: { id: string; text: string }) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/vows/${update.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ text: update.text }),
+    })
+
+    if (!response.ok) throw new Error('Failed to update vow')
+
+    // Refresh the vows list
+    await fetchVows()
     outputContent.value = `📝 Updated vow:\n${update.text}`
+  } catch (error) {
+    console.error('Error updating vow:', error)
+    outputContent.value = '❌ Failed to update vow'
   }
 }
 
-function handleDelete(vowId: string) {
-  const index = vows.value.findIndex((v) => v.id === vowId)
-  if (index !== -1) {
-    const deletedVow = vows.value[index]
-    vows.value = vows.value.filter((v) => v.id !== vowId)
-    outputContent.value = `🗑️ Deleted vow:\n${deletedVow.text}`
+async function handleDelete(vowId: string) {
+  try {
+    const vow = vows.value.find((v) => v.id === vowId)
+    const response = await fetch(`${API_BASE_URL}/vows/${vowId}`, {
+      method: 'DELETE',
+    })
+
+    if (!response.ok) throw new Error('Failed to delete vow')
+
+    // Refresh the vows list
+    await fetchVows()
+    outputContent.value = vow ? `🗑️ Deleted vow:\n${vow.text}` : '🗑️ Vow deleted'
+  } catch (error) {
+    console.error('Error deleting vow:', error)
+    outputContent.value = '❌ Failed to delete vow'
   }
 }
+
+const displayText = computed(() => stateMachine[displayMode.value].displayText)
+
+// Fetch vows when component mounts
+onMounted(() => {
+  fetchVows()
+})
 </script>
 
 <template>

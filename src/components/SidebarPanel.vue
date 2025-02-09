@@ -12,6 +12,7 @@ import {
   CubeIcon, // For Go
   BeakerIcon, // For Python
 } from '@heroicons/vue/24/solid'
+import { TYPESCRIPT_VOWS, GO_VOWS, PYTHON_VOWS } from '@/constants/vows'
 
 const props = defineProps<{
   displayText: string
@@ -20,9 +21,10 @@ const props = defineProps<{
 
 const emit = defineEmits(['create', 'read', 'update', 'delete', 'missy-moves'])
 
-const newVowText = ref('')
 const updateVowText = ref('')
-const selectedVow = ref<string>('') // For storing selected vow ID
+const selectedReadVow = ref<string>('')
+const selectedUpdateVow = ref<string>('')
+const selectedDeleteVow = ref<string>('')
 const selectedLanguage = ref<Language>('typescript')
 
 const languages: Language[] = ['typescript', 'go', 'python']
@@ -34,43 +36,58 @@ const languageIcons = {
 }
 
 function handleCreate() {
+  // Get all vows for the selected language
+  const languageVows = {
+    typescript: TYPESCRIPT_VOWS,
+    go: GO_VOWS,
+    python: PYTHON_VOWS,
+  }[selectedLanguage.value]
+
+  // Pick a random vow from the selected language
+  const randomVow = languageVows[Math.floor(Math.random() * languageVows.length)]
+
   emit('create', {
-    text: newVowText.value,
+    text: randomVow.text,
     language: selectedLanguage.value,
   })
-  newVowText.value = '' // Clear input after creation
+
+  // Clear the selection
+  selectedLanguage.value = 'typescript'
 }
 
 function handleUpdate() {
-  if (selectedVow.value) {
+  if (selectedUpdateVow.value) {
     emit('update', {
-      id: selectedVow.value,
+      id: selectedUpdateVow.value,
       text: updateVowText.value,
     })
   }
 }
 
 function handleRead() {
-  if (selectedVow.value) {
-    emit('read', selectedVow.value)
+  if (selectedReadVow.value) {
+    emit('read', selectedReadVow.value)
+    selectedReadVow.value = ''
   }
 }
 
 function handleDelete() {
-  if (selectedVow.value) {
-    emit('delete', selectedVow.value)
-    selectedVow.value = '' // Clear selection after delete
-    updateVowText.value = '' // Clear update text after delete
+  if (selectedDeleteVow.value) {
+    emit('delete', selectedDeleteVow.value)
+    selectedDeleteVow.value = ''
+    updateVowText.value = ''
   }
 }
 
 // When a vow is selected from dropdown, populate update text field
-function onVowSelect(event: Event) {
+function onVowSelect(event: Event, operation: 'read' | 'update' | 'delete') {
   const target = event.target as HTMLSelectElement
-  selectedVow.value = target.value
   const selectedVowObj = props.vows.find((vow) => vow.id === target.value)
+
   if (selectedVowObj) {
-    updateVowText.value = selectedVowObj.text
+    if (operation === 'update') {
+      updateVowText.value = selectedVowObj.text
+    }
   }
 }
 
@@ -108,7 +125,6 @@ function truncateText(text: string, maxLength: number) {
           {{ lang.charAt(0).toUpperCase() + lang.slice(1) }}
         </option>
       </select>
-      <input v-model="newVowText" type="text" class="text-input" placeholder="Enter your vow..." />
       <button class="test-button" @click="handleCreate">Create Vow</button>
     </div>
 
@@ -119,9 +135,9 @@ function truncateText(text: string, maxLength: number) {
         <BookOpenIcon class="section-icon" />
         <h2>Read</h2>
       </div>
-      <select v-model="selectedVow" class="select-input" @change="onVowSelect">
+      <select v-model="selectedReadVow" class="select-input" @change="onVowSelect($event, 'read')">
         <option value="">Select a vow</option>
-        <option v-for="vow in vows" :key="vow.id" :value="vow.id">
+        <option v-for="vow in props.vows" :key="vow.id" :value="vow.id">
           <component :is="languageIcons[vow.language]" class="language-icon" />
           {{ truncateText(vow.text, 30) }}
         </option>
@@ -136,9 +152,13 @@ function truncateText(text: string, maxLength: number) {
         <PencilSquareIcon class="section-icon" />
         <h2>Update</h2>
       </div>
-      <select v-model="selectedVow" class="select-input" @change="onVowSelect">
+      <select
+        v-model="selectedUpdateVow"
+        class="select-input"
+        @change="onVowSelect($event, 'update')"
+      >
         <option value="">Select a vow</option>
-        <option v-for="vow in vows" :key="vow.id" :value="vow.id">
+        <option v-for="vow in props.vows" :key="vow.id" :value="vow.id">
           <component :is="languageIcons[vow.language]" class="language-icon" />
           {{ truncateText(vow.text, 30) }}
         </option>
@@ -159,9 +179,13 @@ function truncateText(text: string, maxLength: number) {
         <TrashIcon class="section-icon" />
         <h2>Delete</h2>
       </div>
-      <select v-model="selectedVow" class="select-input" @change="onVowSelect">
+      <select
+        v-model="selectedDeleteVow"
+        class="select-input"
+        @change="onVowSelect($event, 'delete')"
+      >
         <option value="">Select a vow</option>
-        <option v-for="vow in vows" :key="vow.id" :value="vow.id">
+        <option v-for="vow in props.vows" :key="vow.id" :value="vow.id">
           <component :is="languageIcons[vow.language]" class="language-icon" />
           {{ truncateText(vow.text, 30) }}
         </option>

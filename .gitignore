@@ -28,3 +28,7 @@ coverage
 *.sw?
 
 *.tsbuildinfo
+
+# Database backups
+backend/internal/db/backup/*.sql
+!backend/internal/db/backup/seed.sql
