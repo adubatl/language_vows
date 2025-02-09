@@ -31,11 +31,19 @@ a,
   }
 }
 
+:root {
+  --background-color: #1a1a1a;
+  --text-color: #ffffff;
+}
+
 body {
-  background-color: var(--bg-color);
+  background-color: var(--background-color);
   color: var(--text-color);
   margin: 0;
   padding: 0;
+  transition:
+    background-color 0.3s,
+    color 0.3s;
 }
 
 .app-container {

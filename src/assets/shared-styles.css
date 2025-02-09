@@ -1,0 +1,38 @@
+.select-input {
+  width: 100%;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid var(--border-color);
+  background: var(--button-bg);
+  color: var(--text-color);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.select-input option {
+  background: var(--bg-color);
+  color: var(--text-color);
+}
+
+.text-input {
+  width: 100%;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid var(--border-color);
+  background: var(--button-bg);
+  color: var(--text-color);
+  border-radius: 4px;
+}
+
+.text-input::placeholder {
+  color: var(--text-color);
+  opacity: 0.7;
+  font-style: italic;
+}
+
+.language-icon {
+  width: 1rem;
+  height: 1rem;
+  margin-right: var(--spacing-sm);
+  vertical-align: middle;
+}

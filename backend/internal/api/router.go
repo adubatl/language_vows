@@ -1,10 +1,11 @@
 package api
 
 import (
+	"language_vows/internal/db"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
-	"language_vows/internal/db"
 )
 
 func NewRouter(database *db.Database) *chi.Mux {
