@@ -152,7 +152,7 @@ async function handleUpdate(update: { id: string; text: string }) {
     transactions.value.unshift({
       operation: 'UPDATE',
       timestamp: Date.now(),
-      language: vow?.language,
+      language: vow?.language ?? 'typescript',
       text: update.text,
     })
   } catch (error) {
@@ -176,7 +176,7 @@ async function handleDelete(vowId: string) {
     transactions.value.unshift({
       operation: 'DELETE',
       timestamp: Date.now(),
-      language: vow?.language,
+      language: vow?.language ?? 'typescript',
       text: vow ? vow.text : 'Vow deleted',
     })
   } catch (error) {
@@ -187,7 +187,6 @@ async function handleDelete(vowId: string) {
 
 const displayText = computed(() => stateMachine[displayMode.value].displayText)
 
-// Fetch vows when component mounts
 onMounted(() => {
   fetchVows()
 })

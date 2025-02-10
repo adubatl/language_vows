@@ -62,7 +62,6 @@ const emit = defineEmits(['update:modelValue', 'change'])
 const isOpen = ref(false)
 const resetSelects = inject('resetSelects', () => {})
 
-// Reset state when any action occurs
 watch(
   () => resetSelects(),
   () => {
@@ -71,11 +70,9 @@ watch(
   },
 )
 
-// Add watch for vows changes
 watch(
   () => props.vows,
   () => {
-    // Reset state when vows change
     isOpen.value = false
     emit('update:modelValue', '')
   },
@@ -100,7 +97,6 @@ function truncateText(text: string, maxLength: number) {
   return `${text.slice(0, maxLength)}...`
 }
 
-// Click outside handler
 function handleClickOutside(event: MouseEvent) {
   const target = event.target as HTMLElement
   if (!target.closest('.vow-select')) {
@@ -161,7 +157,7 @@ onUnmounted(() => {
 
 .selected-content {
   flex: 1;
-  min-width: 0; /* Allows text truncation to work */
+  min-width: 0;
 }
 
 .options {

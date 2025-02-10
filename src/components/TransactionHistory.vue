@@ -6,7 +6,6 @@
     </div>
 
     <div class="history-content">
-      <!-- List View (Always visible) -->
       <div class="list-view" data-test="transaction-history">
         <div
           v-for="transaction in transactions"
@@ -28,7 +27,6 @@
         </div>
       </div>
 
-      <!-- Charts View -->
       <div class="charts-view">
         <div class="chart-wrapper">
           <svg ref="operationsChart" class="operations-chart"></svg>
@@ -74,7 +72,6 @@ const languageIcons = {
 const operationsChart = ref<SVGElement>()
 const languagesChart = ref<SVGElement>()
 
-// Watch for transactions changes to update charts
 watch(() => props.transactions, updateCharts, { deep: true })
 
 onMounted(() => {
@@ -92,12 +89,10 @@ function renderOperationsChart() {
   const svg = d3.select(operationsChart.value)
   svg.selectAll('*').remove()
 
-  // Increase size for better clarity
   const size = 100
   const margin = 10
   svg.attr('viewBox', `0 0 ${size} ${size}`).attr('preserveAspectRatio', 'xMidYMid meet')
 
-  // Calculate operation counts
   const operationCounts = Array.from(
     d3.group(props.transactions, (d) => d.operation),
     ([key, value]) => ({ operation: key, count: value.length }),
@@ -105,7 +100,6 @@ function renderOperationsChart() {
 
   const radius = (size - margin * 2) * 0.35
 
-  // Update color scale with more vibrant colors
   const color = d3
     .scaleOrdinal<string>()
     .domain(['CREATE', 'READ', 'UPDATE', 'DELETE'])
@@ -121,10 +115,8 @@ function renderOperationsChart() {
     .innerRadius(radius * 0.6)
     .outerRadius(radius)
 
-  // Create group element
   const g = svg.append('g').attr('transform', `translate(${size / 2},${size / 2})`)
 
-  // Create pie slices with improved styling
   const path = g
     .selectAll('path')
     .data(pie(operationCounts))
@@ -135,13 +127,11 @@ function renderOperationsChart() {
     .attr('stroke', 'var(--bg-color)')
     .attr('stroke-width', 1.5)
 
-  // Add labels with improved positioning and styling
   const labelArc = d3
     .arc<d3.PieArcDatum<{ operation: string; count: number }>>()
     .innerRadius(radius * 1.1)
     .outerRadius(radius * 1.1)
 
-  // Add label backgrounds for better readability
   g.selectAll('path.label-line')
     .data(pie(operationCounts))
     .enter()
@@ -154,7 +144,6 @@ function renderOperationsChart() {
     .attr('stroke', 'var(--border-color)')
     .attr('stroke-width', 1)
 
-  // Add operation name labels
   g.selectAll('text.operation-label')
     .data(pie(operationCounts))
     .enter()
@@ -171,7 +160,6 @@ function renderOperationsChart() {
     .attr('font-weight', 'bold')
     .text((d) => d.data.operation)
 
-  // Add count labels
   g.selectAll('text.count-label')
     .data(pie(operationCounts))
     .enter()
@@ -187,7 +175,6 @@ function renderOperationsChart() {
     .attr('font-size', '7px')
     .text((d) => `(${d.data.count})`)
 
-  // Enhanced hover effects
   path
     .on('mouseenter', function () {
       const element = d3.select(this)
@@ -223,7 +210,6 @@ function renderLanguagesChart() {
 
   const radius = (size - margin * 2) * 0.3
 
-  // Updated language-specific colors
   const color = d3
     .scaleOrdinal<string>()
     .domain(['typescript', 'go', 'python'])
@@ -241,7 +227,6 @@ function renderLanguagesChart() {
 
   const g = svg.append('g').attr('transform', `translate(${size / 2},${size / 2})`)
 
-  // Create pie slices with improved styling
   const path = g
     .selectAll('path')
     .data(pie(languageCounts))
@@ -252,14 +237,12 @@ function renderLanguagesChart() {
     .attr('stroke', 'var(--bg-color)')
     .attr('stroke-width', 1.5)
 
-  // Add language icons with better positioning
   const iconSize = 14
   const iconArc = d3
     .arc<d3.PieArcDatum<{ language: string; count: number }>>()
     .innerRadius(radius * 1.2)
     .outerRadius(radius * 1.2)
 
-  // Add icon containers
   const icons = g
     .selectAll('g.icon-container')
     .data(pie(languageCounts))
@@ -271,14 +254,11 @@ function renderLanguagesChart() {
       return `translate(${x},${y})`
     })
 
-  // Add circular backgrounds and create clip paths
   icons.each(function (d) {
     const container = d3.select(this)
 
-    // Create unique clip path ID for each icon
     const clipId = `clip-${d.data.language}-${d.index}`
 
-    // Add clip path definition
     container
       .append('defs')
       .append('clipPath')
@@ -288,7 +268,6 @@ function renderLanguagesChart() {
       .attr('cx', 0)
       .attr('cy', 0)
 
-    // Add background circle with TypeScript-specific styling
     container
       .append('circle')
       .attr('r', iconSize / 2)
@@ -297,7 +276,6 @@ function renderLanguagesChart() {
       .attr('stroke-width', 1)
 
     if (d.data.language === 'typescript') {
-      // Add TS text for TypeScript
       container
         .append('text')
         .attr('dy', '0.3em')
@@ -307,7 +285,6 @@ function renderLanguagesChart() {
         .attr('font-weight', '1000')
         .text('TS')
     } else {
-      // Add SVG icons for other languages
       container
         .append('svg:image')
         .attr('width', iconSize * 0.8)
@@ -322,7 +299,6 @@ function renderLanguagesChart() {
     }
   })
 
-  // Add count labels with better styling
   g.selectAll('text')
     .data(pie(languageCounts))
     .enter()
@@ -337,7 +313,6 @@ function renderLanguagesChart() {
     .attr('font-size', '7px')
     .text((d) => `(${d.data.count})`)
 
-  // Enhanced hover effects
   path
     .on('mouseenter', function () {
       const element = d3.select(this)
@@ -510,7 +485,6 @@ function truncateText(text: string, length: number): string {
   min-width: 0;
 }
 
-/* Operation-specific styles */
 .create {
   border-left: 3px solid #4caf50;
 }

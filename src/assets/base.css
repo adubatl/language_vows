@@ -1,6 +1,4 @@
-/* color palette from <https://github.com/vuejs/theme> */
 :root {
-  /* Our custom theme colors */
   --bg-color: #1a463c;
   --text-color: #e0e0e0;
   --button-bg: #245a4d;
@@ -10,14 +8,12 @@
   --accent-color: #93cf85;
   --text-muted: #93cf85;
 
-  /* Layout variables */
   --sidebar-width: 350px;
   --spacing-sm: 0.5rem;
   --spacing-md: 1rem;
   --spacing-lg: 1.5rem;
   --spacing-xl: 2rem;
 
-  /* semantic mappings */
   --color-background: var(--bg-color);
   --color-background-soft: var(--button-bg);
   --color-background-mute: var(--code-bg);
@@ -83,14 +79,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Scrollbar Styles */
 * {
-  /* For Firefox */
   scrollbar-width: thin;
   scrollbar-color: var(--border-color) transparent;
 }
 
-/* For Webkit browsers (Chrome, Safari, etc) */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -113,7 +106,6 @@ body {
   background-clip: padding-box;
 }
 
-/* Hide scrollbars on mobile devices */
 @media (max-width: 768px) {
   * {
     scrollbar-width: none;

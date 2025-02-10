@@ -138,11 +138,8 @@ body {
   margin: var(--spacing-md) 0;
 }
 
-/* Reset default styles */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
-
-/* Any other global styles you want to keep... */

@@ -20,20 +20,16 @@ const selectedReadVow = ref<string>('')
 const selectedUpdateVow = ref<string>('')
 const selectedDeleteVow = ref<string>('')
 
-// Create a symbol for the reset function
 const RESET_SELECTS = Symbol('resetSelects')
 
-// Create and provide the reset function
 const resetTrigger = ref(0)
 provide(RESET_SELECTS, () => {
   resetTrigger.value++
 })
 
-// Watch for changes in vows array
 watch(
   () => props.vows,
   (newVows) => {
-    // Reset selections if their vow no longer exists
     if (selectedReadVow.value && !newVows?.find((v) => v.id === selectedReadVow.value)) {
       selectedReadVow.value = ''
     }
