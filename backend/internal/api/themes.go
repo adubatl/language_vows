@@ -47,7 +47,6 @@ func (tr themesResource) GenerateTheme(w http.ResponseWriter, r *http.Request) {
 	Format the response as valid JSON only, no other text.
 	If the prompt contains a color, use it or something similar as the background color.`, themeRequest.Prompt)
 
-
 	reqBody := map[string]interface{}{
 		"model":  "mistral",
 		"prompt": prompt,
@@ -96,4 +95,4 @@ func (tr themesResource) GenerateTheme(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 		return
 	}
-} 
+}

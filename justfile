@@ -184,3 +184,25 @@ aws-status-all:
 # Fetch AWS credentials and save to .env.aws.generated
 aws-fetch-credentials:
     ./scripts/dev/fetch-credentials.sh
+
+# Format Go code
+go-fmt:
+    gofmt -w ./backend
+
+# Run Go linter
+go-lint:
+    cd backend && golangci-lint run ./...
+
+# Install Go tools
+go-tools:
+    go install golang.org/x/tools/cmd/goimports@latest
+    curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
+
+# Auto-fix common Go issues
+go-fix:
+    cd backend && goimports -w .
+    cd backend && go vet ./...
+    cd backend && golangci-lint run --fix ./...
+
+# Format and lint Go code (with fixes)
+go-format: go-fmt go-fix go-lint

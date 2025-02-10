@@ -26,4 +26,4 @@ func NewRouter(database *db.Database) *chi.Mux {
 	})
 
 	return r
-} 
+}

@@ -18,18 +18,18 @@ type vowsResource struct {
 func (vr vowsResource) Routes() chi.Router {
 	r := chi.NewRouter()
 
-	r.Get("/", vr.List)    
-	r.Post("/", vr.Create) 
+	r.Get("/", vr.List)
+	r.Post("/", vr.Create)
 	r.Route("/{vowID}", func(r chi.Router) {
-		r.Get("/", vr.Get)       
-		r.Put("/", vr.Update)    
-		r.Delete("/", vr.Delete) 
+		r.Get("/", vr.Get)
+		r.Put("/", vr.Update)
+		r.Delete("/", vr.Delete)
 	})
 
 	return r
 }
 
-func (vr vowsResource) List(w http.ResponseWriter, r *http.Request) {
+func (vr vowsResource) List(w http.ResponseWriter, _ *http.Request) {
 	rows, err := vr.db.DB.Query("SELECT id, text, language FROM vows ORDER BY id")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -50,7 +50,10 @@ func (vr vowsResource) List(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Number of vows in database: %d", len(vows))
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(vows)
+	if err := json.NewEncoder(w).Encode(vows); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func (vr vowsResource) Create(w http.ResponseWriter, r *http.Request) {
@@ -78,30 +81,36 @@ func (vr vowsResource) Create(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(vow)
+	if err := json.NewEncoder(w).Encode(vow); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func (vr vowsResource) Get(w http.ResponseWriter, r *http.Request) {
 	vowID := chi.URLParam(r, "vowID")
-	
+
 	var vow models.Vow
 	err := vr.db.DB.QueryRow(
 		"SELECT id, text, language FROM vows WHERE id = $1",
 		vowID,
 	).Scan(&vow.ID, &vow.Text, &vow.Language)
-	
+
 	if err != nil {
 		http.Error(w, "Vow not found", http.StatusNotFound)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(vow)
+	if err := json.NewEncoder(w).Encode(vow); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func (vr vowsResource) Update(w http.ResponseWriter, r *http.Request) {
 	vowID := chi.URLParam(r, "vowID")
-	
+
 	var vow models.Vow
 	if err := json.NewDecoder(r.Body).Decode(&vow); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -142,4 +151,4 @@ func (vr vowsResource) Delete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusNoContent)
-} 
+}

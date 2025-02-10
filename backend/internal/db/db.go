@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	// Import pq for Postgres driver side effects
 	_ "github.com/lib/pq"
 )
 
@@ -39,4 +40,4 @@ func Initialize() (*Database, error) {
 
 func (db *Database) Close() error {
 	return db.DB.Close()
-} 
+}
