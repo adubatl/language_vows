@@ -32,3 +32,31 @@ coverage
 # Database backups
 backend/internal/db/backup/*.sql
 !backend/internal/db/backup/seed.sql
+
+# AWS credentials
+.env.aws.generated
+.aws-credentials/
+
+# AWS logs
+.aws/setup-*.log
+
+# AWS Configuration
+.aws/*.json
+!.aws/*.template.json
+.aws/credentials
+.aws/config
+
+# Environment files
+.env*
+.env.aws
+!.env.example
+!.env.template
+!.env.aws.template
+
+# Task definitions
+.aws/task-definition-*.json
+!.aws/task-definition-*.template.json
+
+# Backup files
+*.bak
+.aws/*.bak

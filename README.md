@@ -11,70 +11,88 @@ A Vue 3 + TypeScript application for managing programming language vows, with a 
 - Node.js (v18+)
 - Go (v1.23+)
 - Docker and Docker Compose
+- AWS CLI configured
 - VSCode (or Cursor) (recommended)
 
-### VSCode Configuration
+### Initial Configuration
 
-1. Install the recommended extensions:
+1. Set up environment files:
 
-   - Vue.volar (Vue 3 support)
-   - vitest.explorer (Unit testing)
-   - dbaeumer.vscode-eslint (ESLint)
-   - EditorConfig.EditorConfig (EditorConfig)
-   - esbenp.prettier-vscode (Prettier)
-   - skellock.just (Justfile support)
+   ```sh
+   # Create local environment file from template
+   cp .env.aws.template .env.aws
 
-2. Add the following to your VSCode settings.json (already configured in .vscode/settings.json):
-   ```json
-   {
-     "editor.formatOnSave": true,
-     "editor.defaultFormatter": "esbenp.prettier-vscode",
-     "editor.codeActionsOnSave": {
-       "source.fixAll": "explicit"
-     },
-     "files.associations": {
-       "justfile": "just"
-     }
-   }
+   # Edit .env.aws with your AWS configuration
+   # DO NOT commit this file - it contains sensitive information
    ```
 
-### Project Setup
-
-1. Install dependencies:
-
+2. Install dependencies:
    ```sh
    npm install
    ```
 
-2. Start the database:
+### Local Development
+
+1. Start the database:
 
    ```sh
    just db-up
    ```
 
-3. Initialize the database:
+2. Initialize the database:
 
    ```sh
    just db-init-all
    ```
 
-4. Start the backend (database + Go server):
+3. Start the backend (database + Go server):
 
    ```sh
    just be
    ```
 
-5. Start the frontend:
-
+4. Start the frontend:
    ```sh
    just fe
    ```
 
 The application should now be running at http://localhost:5173
 
+### AWS Deployment Setup
+
+1. Configure AWS credentials:
+
+   ```sh
+   aws configure
+   ```
+
+2. Generate AWS resources:
+
+   ```sh
+   # Generate task definitions from templates
+   just aws-generate-tasks
+
+   # Set up all AWS resources
+   just aws-setup-all
+   ```
+
+3. Verify setup:
+   ```sh
+   just aws-status-all
+   ```
+
 ## Available Commands
 
-### Frontend (npm/just)
+### AWS Commands
+
+- `just aws-generate-tasks` - Generate task definitions from templates
+- `just aws-setup-all` - Full AWS infrastructure setup
+- `just aws-status` - Check AWS resource status
+- `just aws-status-all` - Detailed status of all AWS resources
+- `just aws-cleanup` - Clean up AWS resources
+- `just aws-teardown` - Full AWS cleanup including VPC and RDS
+
+### Frontend Commands
 
 - `just fe` or `just frontend-up` - Start development server
 - `npm run build` - Build for production
@@ -83,7 +101,7 @@ The application should now be running at http://localhost:5173
 - `npm run lint` - Lint code
 - `npm run format` - Format code with Prettier
 
-### Backend (just)
+### Backend Commands
 
 - `just be` or `just start` - Start both database and backend
 - `just db-up` - Start PostgreSQL container
@@ -98,3 +116,11 @@ The application should now be running at http://localhost:5173
 - `just db-clear` - Clear all vows
 - `just db-backup [type]` - Backup database
 - `just db-init-all` - Initialize schema and seed data
+
+## Security Notes
+
+- Never commit `.env.aws` or `.env.aws.generated` files
+- Use `.env.aws.template` as a reference for required environment variables
+- AWS credentials should be managed through AWS CLI or environment variables
+- Task definitions are generated from templates to avoid committing sensitive data
+- Database passwords are managed through AWS Secrets Manager

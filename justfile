@@ -29,11 +29,11 @@ alias fe := frontend-up
 
 # Start the database container
 db-up:
-    ./scripts/db-up.sh
+    ./scripts/db/up.sh
 
 # Stop the database container
 db-down:
-    ./scripts/db-down.sh
+    ./scripts/db/down.sh
 
 # Restart the database container
 db-restart:
@@ -46,15 +46,15 @@ db-connect:
 
 # Show all tables in the database
 db-tables:
-    docker exec -it language_vows-db-1 psql -U postgres -d language_vows -c '\dt'
+    ./scripts/db/status.sh
 
 # Show contents of vows table
 db-vows:
-    docker exec -it language_vows-db-1 psql -U postgres -d language_vows -c 'SELECT * FROM vows;'
+    docker exec language_vows-db-1 psql -U postgres -d language_vows -c '\x on' -c 'SELECT * FROM vows;'
 
 # Count rows in a table (default: vows)
 db-count table="vows":
-    docker exec -it language_vows-db-1 psql -U postgres -d language_vows -c 'SELECT COUNT(*) FROM {{table}};'
+    docker exec language_vows-db-1 psql -U postgres -d language_vows -t -c 'SELECT COUNT(*) FROM {{table}};' | tr -d '[:space:]'
 
 # Clear all vows from the table
 db-clear:
@@ -66,7 +66,7 @@ db-init:
 
 # Run the Go backend server
 go-run:
-    ./scripts/go-run.sh
+    ./scripts/dev/go-run.sh
 
 # Start everything (legacy method - prefer 'just up')
 start:
@@ -76,13 +76,88 @@ alias be := start
 
 # Backup the database to a file (seed.sql or timestamped)
 db-backup type="timestamp":
-    ./scripts/db-backup.sh {{type}}
+    ./scripts/db/backup.sh {{type}}
 
 # Restore the database from backup
 db-restore:
-    ./scripts/db-restore.sh
+    ./scripts/db/restore.sh
 
 # Initialize database with schema and seed data
 db-init-all:
     just db-init
     just db-restore
+
+# List all AWS resources for the project
+aws-status:
+    ./scripts/aws/status.sh
+
+# Check specific AWS resource status
+aws-check RESOURCE:
+    ./scripts/aws/check.sh {{RESOURCE}}
+
+# Set GitHub secrets from AWS config and generated credentials
+gh-secrets:
+    ./scripts/gh-secrets.sh
+
+# Check AWS Secrets Manager
+aws-check-secrets:
+    ./scripts/aws/secrets.sh
+
+# Validate ECS task definitions
+aws-validate-tasks:
+    ./scripts/aws/validate-tasks.sh
+
+# Check ECS service status and events
+aws-check-services:
+    ./scripts/aws/services.sh
+
+# Check AWS Fargate service quotas
+aws-check-quotas:
+    ./scripts/aws/quotas.sh
+
+# Create AWS secret for DB password
+aws-create-secret:
+    ./scripts/aws/create-secret.sh
+
+# Update task definitions with actual values
+aws-update-tasks:
+    ./scripts/aws/update-tasks.sh
+
+# Create security groups for ECS and RDS
+aws-create-security:
+    ./scripts/aws/create-security.sh
+
+# Create ECS execution role
+aws-create-ecs-role:
+    ./scripts/aws/create-ecs-role.sh
+
+# Create ECS services
+aws-create-services:
+    ./scripts/aws/create-services.sh
+
+# Clean up AWS resources
+aws-cleanup:
+    ./scripts/aws/cleanup.sh
+
+# Full AWS cleanup including VPC and RDS
+aws-teardown:
+    ./scripts/aws/teardown.sh
+
+# Generate AWS task definitions
+aws-generate-tasks:
+    ./scripts/aws/generate-task-definitions.sh
+
+# Full AWS setup sequence with generated tasks
+aws-setup-all:
+    test -f .env.aws || { echo "Error: Must be run from project root directory"; exit 1; }
+    just aws-generate-tasks
+    test -x scripts/aws/setup-all.sh || chmod +x scripts/aws/setup-all.sh
+    scripts/aws/setup-all.sh
+
+# Check all AWS resource status
+aws-status-all:
+    ./scripts/aws/status-all.sh
+
+# Fetch AWS credentials and save to .env.aws.generated
+aws-fetch-credentials:
+    ./scripts/dev/fetch-credentials.sh

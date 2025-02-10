@@ -1,0 +1,70 @@
+name: Deploy to AWS
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  AWS_REGION: us-west-2
+  ECR_REPOSITORY_FRONTEND: language-vows-frontend
+  ECR_REPOSITORY_BACKEND: language-vows-backend
+  ECS_CLUSTER: language-vows
+  ECS_SERVICE_FRONTEND: frontend-service
+  ECS_SERVICE_BACKEND: backend-service
+  ECS_TASK_DEFINITION_FRONTEND: .aws/task-definition-frontend.json
+  ECS_TASK_DEFINITION_BACKEND: .aws/task-definition-backend.json
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build and push frontend image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:${{ github.sha }} -f Dockerfile.frontend .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_FRONTEND:${{ github.sha }}
+
+      - name: Build and push backend image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_BACKEND:${{ github.sha }} -f backend/Dockerfile .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_BACKEND:${{ github.sha }}
+
+      - name: Fill in the new image IDs in the Amazon ECS task definitions
+        run: |
+          sed -i "s|<IMAGE>|${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY_FRONTEND:${{ github.sha }}|g" $ECS_TASK_DEFINITION_FRONTEND
+          sed -i "s|<IMAGE>|${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY_BACKEND:${{ github.sha }}|g" $ECS_TASK_DEFINITION_BACKEND
+
+      - name: Deploy Amazon ECS tasks
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ env.ECS_TASK_DEFINITION_FRONTEND }}
+          service: ${{ env.ECS_SERVICE_FRONTEND }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+
+      - name: Deploy backend to Amazon ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ env.ECS_TASK_DEFINITION_BACKEND }}
+          service: ${{ env.ECS_SERVICE_BACKEND }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
