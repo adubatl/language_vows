@@ -60,3 +60,6 @@ backend/internal/db/backup/*.sql
 # Backup files
 *.bak
 .aws/*.bak
+
+# Husky
+.husky/_

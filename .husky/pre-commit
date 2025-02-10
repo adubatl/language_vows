@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Run lint-staged for JS/TS/Vue files
+npx lint-staged
+
+# Format Go files if they exist
+if [ -d "backend" ]; then
+  echo "Formatting Go files..."
+  just go-format || exit 1
+fi 
