@@ -44,7 +44,9 @@ func (tr themesResource) GenerateTheme(w http.ResponseWriter, r *http.Request) {
 	5. "accent": A complementary hex color code that adds visual interest
 	
 	Ensure the colors have sufficient contrast for readability.
-	Format the response as valid JSON only, no other text.`, themeRequest.Prompt)
+	Format the response as valid JSON only, no other text.
+	If the prompt contains a color, use it or something similar as the background color.`, themeRequest.Prompt)
+
 
 	reqBody := map[string]interface{}{
 		"model":  "mistral",
