@@ -68,9 +68,32 @@ db-init:
 go-run:
     ./scripts/dev/go-run.sh
 
-# Start everything (legacy method - prefer 'just up')
+# Check status of all services
+status:
+    @echo "=== Database Status ==="
+    @just db-status
+    @echo "\n=== Backend Status ==="
+    @just backend-status
+    @echo "\n=== Ollama Status ==="
+    @just ollama-status
+
+# Check database status
+db-status:
+    ./scripts/db/status.sh
+
+# Check backend status
+backend-status:
+    @curl -s http://localhost:8080/api/vows > /dev/null && echo "Backend: ✅ Running" || echo "Backend: ❌ Not running"
+
+# Check Ollama status
+ollama-status:
+    @curl -s http://localhost:11434/api/version > /dev/null && echo "Ollama: ✅ Running" || echo "Ollama: ❌ Not running"
+
+# Start everything (backend, database, and Ollama)
 start:
     just db-up
+    docker compose up -d ollama
+    sleep 5  # Give Ollama time to start
     just go-run
 alias be := start
 
