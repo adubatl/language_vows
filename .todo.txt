@@ -1,6 +1,7 @@
 TODO LIST
 make github actions work
 write up notes on vue and how it works cause idk man
+validate the precommits are working
 probably drink some water
 
 
