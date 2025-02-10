@@ -182,7 +182,7 @@ function renderOperationsChart() {
         .transition()
         .duration(200)
         .attr('transform', (d) => {
-          const [x, y] = arc.centroid(d)
+          const [x, y] = arc.centroid(d as d3.PieArcDatum<{ operation: string; count: number }>)
           return `translate(${x * 0.05},${y * 0.05})`
         })
         .style('filter', 'brightness(1.1)')
@@ -293,7 +293,7 @@ function renderLanguagesChart() {
         .attr('y', -iconSize * 0.4)
         .attr('clip-path', `url(#${clipId})`)
         .attr('href', () => {
-          const icon = languageIcons[d.data.language]
+          const icon = languageIcons[d.data.language as keyof typeof languageIcons]
           return `https://api.iconify.design/${icon.split(':')[0]}/${icon.split(':')[1]}.svg`
         })
     }
@@ -320,7 +320,7 @@ function renderLanguagesChart() {
         .transition()
         .duration(200)
         .attr('transform', (d) => {
-          const [x, y] = arc.centroid(d)
+          const [x, y] = arc.centroid(d as d3.PieArcDatum<{ language: string; count: number }>)
           return `translate(${x * 0.05},${y * 0.05})`
         })
         .style('filter', 'brightness(1.1)')
