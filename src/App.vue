@@ -285,7 +285,7 @@ body * {
 }
 
 .top-section .missy {
-  max-height: 180px; /* Slightly smaller than container to allow for borders */
+  max-height: 180px;
   width: auto;
 }
 </style>
