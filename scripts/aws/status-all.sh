@@ -1,36 +1,28 @@
 #!/usr/bin/env sh
 printf "=== AWS Infrastructure Status ===\n\n"
 
-# Function to print section header
 print_header() {
     printf "\n=== %s ===\n\n" "$1"
 }
 
-# RDS Status
 print_header "RDS Status"
 ./scripts/aws/check.sh rds
 
-# ECR Status
 print_header "ECR Status"
 ./scripts/aws/check.sh ecr
 
-# ECS Status
 print_header "ECS Status"
 ./scripts/aws/check.sh ecs
 
-# VPC Status
 print_header "VPC Status"
 ./scripts/aws/check.sh vpc
 
-# Service Status
 print_header "Service Status"
 ./scripts/aws/services.sh
 
-# Secrets Status
 print_header "Secrets Status"
 ./scripts/aws/secrets.sh
 
-# Subnet Status
 print_header "Subnet Status"
 printf "%-20s %-15s %-20s %s\n" "SUBNET ID" "CIDR" "NAME" "AZ"
 printf "%-20s %-15s %-20s %s\n" "---------" "----" "----" "--"

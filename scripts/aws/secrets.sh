@@ -3,7 +3,6 @@ printf "=== AWS Secrets Status ===\n\n"
 printf "%-40s %-20s %s\n" "SECRET NAME" "LAST MODIFIED" "DETAILS"
 printf "%-40s %-20s %s\n" "-----------" "-------------" "-------"
 
-# List all secrets
 aws secretsmanager list-secrets \
     --query 'SecretList[].[Name,LastChangedDate]' \
     --output text | \

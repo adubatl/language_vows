@@ -67,8 +67,6 @@ const clearOutput = () => {
 <style scoped>
 .code-container {
   width: 100%;
-  height: 75%;
-  padding: var(--spacing-lg);
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
@@ -115,7 +113,7 @@ const clearOutput = () => {
   border-radius: 4px;
   font-family: monospace;
   width: 100%;
-  flex-grow: 1;
+  max-height: 300px;
   overflow-y: auto;
   overflow-x: hidden;
   margin: 0;

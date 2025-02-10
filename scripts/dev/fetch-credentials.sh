@@ -1,22 +1,18 @@
 #!/bin/bash
 set -e
 
-# Load environment variables
 source .env.aws
 
-# Fetch RDS credentials
 DB_PASSWORD=$(aws rds describe-db-instances \
     --db-instance-identifier ${PROJECT_NAME}-db \
     --query 'DBInstances[0].MasterUserPassword' \
     --output text)
 
-# Get RDS endpoint
 DB_ENDPOINT=$(aws rds describe-db-instances \
     --db-instance-identifier ${PROJECT_NAME}-db \
     --query 'DBInstances[0].Endpoint.Address' \
     --output text)
 
-# Create .env.aws.generated with sensitive data
 cat > .env.aws.generated << EOL
 # Generated AWS Credentials - DO NOT COMMIT THIS FILE
 # Generated on $(date)

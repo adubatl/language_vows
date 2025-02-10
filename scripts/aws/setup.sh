@@ -1,11 +1,9 @@
 #!/bin/bash
-# Add execute permission check
 if [ ! -x "$(command -v aws)" ]; then
     echo "Error: aws CLI not found or not executable"
     exit 1
 fi
 
-# Ensure we're in the right directory
 if [ ! -f ".env.aws" ] && [ ! -f ".env.aws.template" ]; then
     echo "Error: Must be run from project root directory"
     exit 1
@@ -13,12 +11,10 @@ fi
 
 set -e
 
-# Load environment variables from .env.aws if it exists
 if [ -f .env.aws ]; then
     source .env.aws
 fi
 
-# Function to handle setup status (without printing)
 handle_setup() {
     local resource=$1
     local command=$2
@@ -38,7 +34,6 @@ handle_setup() {
                 return 0
                 ;;
             *"LimitExceeded"*)
-                # For IGW limit, try to find and use existing one
                 if [[ $resource == *"Internet Gateway"* ]]; then
                     IGW_ID=$(aws ec2 describe-internet-gateways \
                         --filters "Name=attachment.vpc-id,Values=$VPC_ID" \
@@ -60,11 +55,9 @@ handle_setup() {
     fi
 }
 
-# Modify the ECS service-linked role creation to handle existing role
 handle_setup "ECS Service-Linked Role" "aws iam get-role --role-name AWSServiceRoleForECS" || \
 handle_setup "ECS Service-Linked Role" "aws iam create-service-linked-role --aws-service-name ecs.amazonaws.com"
 
-# Create ECR repositories
 handle_setup "ECR Frontend Repository" "aws ecr create-repository \
     --repository-name ${PROJECT_NAME}-frontend \
     --image-scanning-configuration scanOnPush=true" || true
@@ -73,20 +66,16 @@ handle_setup "ECR Backend Repository" "aws ecr create-repository \
     --repository-name ${PROJECT_NAME}-backend \
     --image-scanning-configuration scanOnPush=true" || true
 
-# Give IAM role a moment to propagate
 sleep 10
 
-# Create ECS cluster
 handle_setup "ECS Cluster" "aws ecs create-cluster \
     --cluster-name ${PROJECT_NAME} \
     --capacity-providers FARGATE \
     --default-capacity-provider-strategy capacityProvider=FARGATE,weight=1" || exit 1
 
-# Create CloudWatch log groups
 handle_setup "CloudWatch Frontend Log Group" "aws logs create-log-group --log-group-name ecs/${PROJECT_NAME}-frontend" || true
 handle_setup "CloudWatch Backend Log Group" "aws logs create-log-group --log-group-name ecs/${PROJECT_NAME}-backend" || true
 
-# For VPC, first check if it exists
 VPC_ID=$(aws ec2 describe-vpcs \
     --filters "Name=tag:Name,Values=${PROJECT_NAME}-vpc" \
     --query 'Vpcs[0].VpcId' \
@@ -105,7 +94,6 @@ else
         --output text)
 fi
 
-# For Internet Gateway, first check if one is already attached to the VPC
 IGW_ID=$(aws ec2 describe-internet-gateways \
     --filters "Name=attachment.vpc-id,Values=$VPC_ID" \
     --query 'InternetGateways[0].InternetGatewayId' \
@@ -123,26 +111,23 @@ else
         --output text)
 fi
 
-# Function to get or create subnet
 get_or_create_subnet() {
     local name=$1
     local cidr=$2
     local az=$3
     local type=$4  # public or private
 
-    # Check for existing subnet
     local subnet_id=$(aws ec2 describe-subnets \
         --filters "Name=vpc-id,Values=$VPC_ID" "Name=tag:Name,Values=${PROJECT_NAME}-${type}-${name}" \
         --query 'Subnets[0].SubnetId' \
         --output text)
 
     if [ "$subnet_id" != "None" ] && [ -n "$subnet_id" ]; then
-        echo "Using existing subnet: $subnet_id" >&2  # Print to stderr
-        printf "%s" "$subnet_id"  # Return only the ID
+        echo "Using existing subnet: $subnet_id" >&2
+        printf "%s" "$subnet_id"
         return 0
     fi
 
-    # Create new subnet
     subnet_id=$(aws ec2 create-subnet \
         --vpc-id $VPC_ID \
         --cidr-block $cidr \
@@ -151,16 +136,14 @@ get_or_create_subnet() {
         --query 'Subnet.SubnetId' \
         --output text)
     
-    echo "Created new subnet: $subnet_id" >&2  # Print to stderr
-    printf "%s" "$subnet_id"  # Return only the ID
+    echo "Created new subnet: $subnet_id" >&2
+    printf "%s" "$subnet_id"
 }
 
-# Get availability zones
 AZS=($(aws ec2 describe-availability-zones \
     --query 'AvailabilityZones[0:2].ZoneName' \
     --output text))
 
-# Status messages for subnet setup
 echo "Setting up public subnets..." >&2
 PUBLIC_SUBNET_1=$(get_or_create_subnet "1" "$SUBNET_1_CIDR" "${AZS[0]}" "public")
 PUBLIC_SUBNET_2=$(get_or_create_subnet "2" "$SUBNET_2_CIDR" "${AZS[1]}" "public")
@@ -169,7 +152,6 @@ echo "Setting up private subnets..." >&2
 PRIVATE_SUBNET_1=$(get_or_create_subnet "1" "$SUBNET_3_CIDR" "${AZS[0]}" "private")
 PRIVATE_SUBNET_2=$(get_or_create_subnet "2" "$SUBNET_4_CIDR" "${AZS[1]}" "private")
 
-# Check for existing route table
 PUBLIC_RTB=$(aws ec2 describe-route-tables \
     --filters "Name=vpc-id,Values=$VPC_ID" "Name=tag:Name,Values=${PROJECT_NAME}-public-rtb" \
     --query 'RouteTables[0].RouteTableId' \
@@ -177,14 +159,12 @@ PUBLIC_RTB=$(aws ec2 describe-route-tables \
 
 if [ "$PUBLIC_RTB" = "None" ] || [ -z "$PUBLIC_RTB" ]; then
     echo "Creating public route table..."
-    # Create route table for public subnets
     PUBLIC_RTB=$(aws ec2 create-route-table \
         --vpc-id $VPC_ID \
         --tag-specifications "ResourceType=route-table,Tags=[{Key=Name,Value=${PROJECT_NAME}-public-rtb}]" \
         --query 'RouteTable.RouteTableId' \
         --output text)
 
-    # Create route to Internet Gateway
     aws ec2 create-route \
         --route-table-id $PUBLIC_RTB \
         --destination-cidr-block 0.0.0.0/0 \
@@ -193,7 +173,6 @@ else
     echo "Using existing route table: $PUBLIC_RTB"
 fi
 
-# Associate public subnets with public route table (idempotent operation)
 echo "Associating public subnets with route table..."
 aws ec2 associate-route-table \
     --subnet-id $PUBLIC_SUBNET_1 \
@@ -203,7 +182,6 @@ aws ec2 associate-route-table \
     --subnet-id $PUBLIC_SUBNET_2 \
     --route-table-id $PUBLIC_RTB || true
 
-# Enable auto-assign public IP for public subnets (idempotent operation)
 echo "Enabling auto-assign public IPs for public subnets..."
 aws ec2 modify-subnet-attribute \
     --subnet-id $PUBLIC_SUBNET_1 \
@@ -213,7 +191,6 @@ aws ec2 modify-subnet-attribute \
     --subnet-id $PUBLIC_SUBNET_2 \
     --map-public-ip-on-launch || true
 
-# Check for existing DB subnet group
 DB_SUBNET_GROUP=$(aws rds describe-db-subnet-groups \
     --db-subnet-group-name ${PROJECT_NAME}-db-subnet \
     --query 'DBSubnetGroups[0].DBSubnetGroupName' \
@@ -230,7 +207,6 @@ else
     echo "Using existing DB subnet group: $DB_SUBNET_GROUP"
 fi
 
-# Before RDS creation, add check for existing instance
 echo "Checking RDS instance..."
 RDS_EXISTS=$(aws rds describe-db-instances \
     --db-instance-identifier ${PROJECT_NAME}-db \
@@ -239,14 +215,12 @@ RDS_EXISTS=$(aws rds describe-db-instances \
 
 if [ -n "$RDS_EXISTS" ] && [ "$RDS_EXISTS" != "None" ]; then
     echo "Using existing RDS instance: $RDS_EXISTS"
-    # Get existing password from Secrets Manager or skip if not needed
     DB_PASSWORD=$(aws secretsmanager get-secret-value \
         --secret-id ${PROJECT_NAME}/db-password \
         --query 'SecretString' \
         --output text 2>/dev/null || echo "")
 else
     echo "Creating new RDS instance (estimated time: 5-10 minutes)..."
-    # Generate a valid RDS password (16 characters, alphanumeric with allowed special chars)
     DB_PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9#%^*+=' | fold -w 16 | head -n 1)
 
     aws rds create-db-instance \
@@ -268,7 +242,6 @@ else
     echo "RDS instance creation initiated successfully"
 fi
 
-# Save VPC and subnet IDs to .env.aws.generated
 cat > .env.aws.generated << EOL
 # AWS Infrastructure Configuration
 # Generated on $(date)

@@ -4,7 +4,8 @@ import SidebarPanel from '@/components/SidebarPanel.vue'
 import MissyDisplay from '@/components/MissyDisplay.vue'
 import CodeOutput from '@/components/CodeOutput.vue'
 import { DisplayMode, Position } from '@/constants/missy'
-import type { LanguageVow, VowsArray, Language } from '@/types/vow'
+import type { LanguageVow, VowsArray, Language, Transaction } from '@/types/vow'
+import TransactionHistory from '@/components/TransactionHistory.vue'
 
 const outputContent = ref('')
 const currentRotation = ref(0)
@@ -76,6 +77,8 @@ async function fetchVows() {
   }
 }
 
+const transactions = ref<Transaction[]>([])
+
 async function handleCreate(newVow: { text: string; language: LanguageVow['language'] }) {
   const vow: LanguageVow = {
     text: newVow.text,
@@ -98,6 +101,12 @@ async function handleCreate(newVow: { text: string; language: LanguageVow['langu
     await fetchVows()
     currentLanguage.value = vow.language
     outputContent.value = `✨ Created new vow:\n${vow.text}`
+    transactions.value.unshift({
+      operation: 'CREATE',
+      timestamp: Date.now(),
+      language: vow.language,
+      text: vow.text,
+    })
   } catch (error) {
     console.error('Error creating vow:', error)
     outputContent.value = '❌ Failed to create vow'
@@ -112,6 +121,12 @@ async function handleRead(vowId: string) {
     const vow = await response.json()
     currentLanguage.value = vow.language
     outputContent.value = `📖 Reading vow:\n${vow.text}`
+    transactions.value.unshift({
+      operation: 'READ',
+      timestamp: Date.now(),
+      language: vow.language,
+      text: vow.text,
+    })
   } catch (error) {
     console.error('Error reading vow:', error)
     outputContent.value = '❌ Failed to read vow'
@@ -134,6 +149,12 @@ async function handleUpdate(update: { id: string; text: string }) {
     await fetchVows()
     currentLanguage.value = vow?.language
     outputContent.value = `📝 Updated vow:\n${update.text}`
+    transactions.value.unshift({
+      operation: 'UPDATE',
+      timestamp: Date.now(),
+      language: vow?.language,
+      text: update.text,
+    })
   } catch (error) {
     console.error('Error updating vow:', error)
     outputContent.value = '❌ Failed to update vow'
@@ -152,6 +173,12 @@ async function handleDelete(vowId: string) {
     await fetchVows()
     currentLanguage.value = vow?.language
     outputContent.value = vow ? `🗑️ Deleted vow:\n${vow.text}` : '🗑️ Vow deleted'
+    transactions.value.unshift({
+      operation: 'DELETE',
+      timestamp: Date.now(),
+      language: vow?.language,
+      text: vow ? vow.text : 'Vow deleted',
+    })
   } catch (error) {
     console.error('Error deleting vow:', error)
     outputContent.value = '❌ Failed to delete vow'
@@ -169,17 +196,24 @@ onMounted(() => {
 <template>
   <div class="app-container">
     <SidebarPanel
-      :display-text="displayText"
       :vows="vows"
-      @missy-moves="handleMissyMoves"
+      :display-text="displayText"
       @create="handleCreate"
       @read="handleRead"
       @update="handleUpdate"
       @delete="handleDelete"
+      @missy-moves="handleMissyMoves"
     />
     <div class="right-panel">
-      <MissyDisplay :rotation="currentRotation" :position="position" />
-      <CodeOutput :content="outputContent" :language="currentLanguage" />
+      <div class="top-section">
+        <MissyDisplay :rotation="currentRotation" :position="position" />
+      </div>
+      <div class="middle-section">
+        <TransactionHistory :transactions="transactions" />
+      </div>
+      <div class="bottom-section">
+        <CodeOutput :content="outputContent" :language="currentLanguage" />
+      </div>
     </div>
   </div>
 </template>
@@ -213,9 +247,46 @@ body * {
 }
 
 .right-panel {
-  flex: 1;
   display: flex;
   flex-direction: column;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  height: 100vh;
   overflow: hidden;
+}
+
+.top-section {
+  height: 200px;
+  min-height: 200px;
+  padding: var(--spacing-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.middle-section {
+  flex: 1;
+  height: 400px;
+  min-height: 0;
+  padding: var(--spacing-sm);
+  overflow: hidden;
+}
+
+.bottom-section {
+  padding: var(--spacing-sm);
+  overflow: hidden;
+}
+
+.top-section .missy-container {
+  height: 100%;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.top-section .missy {
+  max-height: 180px; /* Slightly smaller than container to allow for borders */
+  width: auto;
 }
 </style>

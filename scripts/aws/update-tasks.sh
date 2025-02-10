@@ -20,19 +20,15 @@ handle_status() {
     fi
 }
 
-# Get account ID
 ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)
 
-# Get RDS endpoint
 DB_ENDPOINT=$(aws rds describe-db-instances \
     --db-instance-identifier language-vows-db \
     --query 'DBInstances[0].Endpoint.Address' \
     --output text)
 
-# Update backend task definition
 handle_status "Backend Definition Update" "sed -i.bak 's|YOUR_ACCOUNT_ID|${ACCOUNT_ID}|g; s|language-vows-db.cluster-xxxxx.region.rds.amazonaws.com|${DB_ENDPOINT}|g' .aws/task-definition-backend.json"
 
-# Update frontend task definition
 handle_status "Frontend Definition Update" "sed -i.bak 's|http://backend.language-vows.local|http://backend.language-vows.local|g' .aws/task-definition-frontend.json"
 
 printf "\nTask definition updates completed.\n" 

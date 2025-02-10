@@ -18,12 +18,12 @@ type vowsResource struct {
 func (vr vowsResource) Routes() chi.Router {
 	r := chi.NewRouter()
 
-	r.Get("/", vr.List)    // GET /api/vows
-	r.Post("/", vr.Create) // POST /api/vows
+	r.Get("/", vr.List)    
+	r.Post("/", vr.Create) 
 	r.Route("/{vowID}", func(r chi.Router) {
-		r.Get("/", vr.Get)       // GET /api/vows/{vowID}
-		r.Put("/", vr.Update)    // PUT /api/vows/{vowID}
-		r.Delete("/", vr.Delete) // DELETE /api/vows/{vowID}
+		r.Get("/", vr.Get)       
+		r.Put("/", vr.Update)    
+		r.Delete("/", vr.Delete) 
 	})
 
 	return r

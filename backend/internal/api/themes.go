@@ -35,7 +35,6 @@ func (tr themesResource) GenerateTheme(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Printf("Using prompt: %s", themeRequest.Prompt)
 
-	// Prompt for the Mistral model
 	prompt := fmt.Sprintf(`Generate a theme based on this prompt: "%s"
 	Respond with a JSON object containing:
 	1. "name": A short, catchy name for the theme (3-5 words)
@@ -47,7 +46,6 @@ func (tr themesResource) GenerateTheme(w http.ResponseWriter, r *http.Request) {
 	Ensure the colors have sufficient contrast for readability.
 	Format the response as valid JSON only, no other text.`, themeRequest.Prompt)
 
-	// Request body for Ollama
 	reqBody := map[string]interface{}{
 		"model":  "mistral",
 		"prompt": prompt,
@@ -61,7 +59,6 @@ func (tr themesResource) GenerateTheme(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Make request to Ollama
 	log.Printf("Making request to Ollama at %s/api/generate", ollamaHost)
 	resp, err := http.Post(ollamaHost+"/api/generate", "application/json", bytes.NewBuffer(jsonBody))
 	if err != nil {
@@ -71,7 +68,6 @@ func (tr themesResource) GenerateTheme(w http.ResponseWriter, r *http.Request) {
 	}
 	defer resp.Body.Close()
 
-	// Parse Ollama response
 	var ollamaResp struct {
 		Response string `json:"response"`
 	}
@@ -83,7 +79,6 @@ func (tr themesResource) GenerateTheme(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("Raw Ollama response: %s", ollamaResp.Response)
 
-	// Parse the generated JSON string into Theme struct
 	var theme models.Theme
 	if err := json.Unmarshal([]byte(ollamaResp.Response), &theme); err != nil {
 		log.Printf("Error unmarshaling theme: %v", err)
@@ -93,7 +88,6 @@ func (tr themesResource) GenerateTheme(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("Generated theme: %+v", theme)
 
-	// Return the theme
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(theme); err != nil {
 		log.Printf("Error encoding response: %v", err)

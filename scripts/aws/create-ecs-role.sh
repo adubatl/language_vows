@@ -1,24 +1,19 @@
 #!/usr/bin/env sh
-# Source the shared status utilities
 . ./scripts/utils/status.sh
 
-# Print header
 print_status_header "$DEFAULT_FORMAT" \
     "RESOURCE STATUS DETAILS" \
     "-------- ------ -------" \
     "ECS Role Setup"
 
-# Create the role
 handle_status "ECS Role Creation" "aws iam create-role \
     --role-name language-vows-ecs-execution-role \
     --assume-role-policy-document '{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"ecs-tasks.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}'" || true
 
-# Attach required policies
 handle_status "ECS Task Policy" "aws iam attach-role-policy \
     --role-name language-vows-ecs-execution-role \
     --policy-arn arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy" || true
 
-# Add permissions for Secrets Manager
 handle_status "Secrets Access Policy" "aws iam put-role-policy \
     --role-name language-vows-ecs-execution-role \
     --policy-name SecretsManagerAccess \

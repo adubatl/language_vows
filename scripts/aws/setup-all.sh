@@ -1,8 +1,6 @@
 #!/usr/bin/env sh
-# Source the shared status utilities
 . "$(dirname "$0")/../utils/status.sh"
 
-# Load environment variables from .env.aws if it exists
 if [ -f "$(dirname "$0")/../../.env.aws" ]; then
     . "$(dirname "$0")/../../.env.aws"
 else
@@ -10,31 +8,26 @@ else
     exit 1
 fi
 
-# Check for just command
 if ! command -v just >/dev/null 2>&1; then
     echo "Error: just command not found"
     exit 1
 fi
 
-# Initialize logging with timestamp in filename
 LOG_FILE=".aws/setup-$(date '+%Y%m%d-%H%M%S').log"
 mkdir -p "$(dirname "$LOG_FILE")"
-: > "$LOG_FILE"  # Clear log file
+: > "$LOG_FILE"
 
 log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1: $2" >> "$LOG_FILE"
 }
 
-# Print initial status header
 print_status_header "$DEFAULT_FORMAT" \
     "RESOURCE STATUS DETAILS" \
     "-------- ------ -------" \
     "AWS Resource Setup Status"
 
-# Log start
 log "INFO" "Starting AWS infrastructure setup"
 
-# Run initial AWS setup with error capture
 output=$(./scripts/aws/setup.sh 2>&1)
 status=$?
 log "INFO" "Setup output: $output"
@@ -47,7 +40,6 @@ if [ $status -ne 0 ]; then
 fi
 printf "%-30s %-15s %s\n" "Initial Setup" "SUCCESS" "-"
 
-# Wait for RDS to be available
 attempts=0
 max_attempts=120
 while [ $attempts -lt $max_attempts ]; do
@@ -66,7 +58,7 @@ while [ $attempts -lt $max_attempts ]; do
             if [ $attempts -eq 0 ]; then
                 printf "%-30s %-15s %s\n" "RDS Instance" "PENDING" "Waiting for previous instance to be deleted..."
             fi
-            if [ $attempts -eq 60 ]; then  # After ~10 minutes
+            if [ $attempts -eq 60 ]; then
                 printf "%-30s %-15s %s\n" "RDS Instance" "PENDING" "Still deleting, please be patient..."
             fi
             ;;
@@ -77,7 +69,6 @@ while [ $attempts -lt $max_attempts ]; do
             ;;
         *)
             if [ "$status" = "None" ] || [ -z "$status" ]; then
-                # Instance no longer exists, we can proceed with creation
                 break
             fi
             printf "%-30s %-15s %s\n" "RDS Instance" "FAILED" "Unexpected status: $status"
@@ -93,16 +84,12 @@ while [ $attempts -lt $max_attempts ]; do
     sleep 10
 done
 
-# If we were waiting for deletion, now create the new instance
 if [ "$status" = "deleting" ] || [ "$status" = "None" ] || [ -z "$status" ]; then
     printf "%-30s %-15s %s\n" "RDS Instance" "PENDING" "Previous instance deleted, creating new one..."
-    # Wait a bit to ensure AWS has fully cleaned up
     sleep 30
     
-    # Generate a new DB password
     DB_PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9#%^*+=' | fold -w 16 | head -n 1)
     
-    # Save password to .env.aws.generated early so other scripts can use it
     mkdir -p .aws
     cat > .env.aws.generated << EOL
 # Generated AWS Credentials - DO NOT COMMIT THIS FILE
@@ -110,7 +97,6 @@ if [ "$status" = "deleting" ] || [ "$status" = "None" ] || [ -z "$status" ]; the
 DB_PASSWORD=${DB_PASSWORD}
 EOL
     
-    # Try to create the new instance
     attempts=0
     while [ $attempts -lt $max_attempts ]; do
         status=$(aws rds describe-db-instances \
@@ -131,7 +117,6 @@ EOL
                 ;;
             *)
                 if [ $attempts -eq 0 ]; then
-                    # First attempt to create
                     aws rds create-db-instance \
                         --db-instance-identifier language-vows-db \
                         --db-instance-class db.t3.micro \
@@ -162,7 +147,6 @@ EOL
     done
 fi
 
-# Run remaining setup steps
 handle_status "Credentials" "just aws-fetch-credentials" || exit 1
 handle_status "Security Groups" "just aws-create-security" || exit 1
 handle_status "Secrets Manager" "just aws-create-secret" || exit 1

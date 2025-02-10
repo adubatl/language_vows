@@ -1,8 +1,6 @@
 #!/usr/bin/env sh
-# Source the shared status utilities
 . ./scripts/utils/status.sh
 
-# Print header
 print_status_header "$DEFAULT_FORMAT" \
     "RESOURCE STATUS DETAILS" \
     "-------- ------ -------" \
@@ -33,7 +31,6 @@ handle_status() {
     fi
 }
 
-# Get VPC ID
 VPC_ID=$(aws ec2 describe-vpcs --filters "Name=tag:Name,Values=language-vows-vpc" --query 'Vpcs[0].VpcId' --output text)
 if [ "$VPC_ID" = "None" ] || [ -z "$VPC_ID" ]; then
     echo "DEBUG: VPC lookup failed. Output: $(aws ec2 describe-vpcs --filters "Name=tag:Name,Values=language-vows-vpc")" >&2
@@ -42,7 +39,6 @@ if [ "$VPC_ID" = "None" ] || [ -z "$VPC_ID" ]; then
 fi
 echo "DEBUG: Found VPC: $VPC_ID" >&2
 
-# Check for existing security group
 ECS_SG=$(aws ec2 describe-security-groups \
     --filters "Name=vpc-id,Values=$VPC_ID" "Name=group-name,Values=language-vows-ecs-sg" \
     --query 'SecurityGroups[0].GroupId' \
@@ -53,10 +49,8 @@ if [ "$ECS_SG" = "None" ] || [ -z "$ECS_SG" ]; then
     echo "DEBUG: Creating new security group..." >&2
     handle_status "ECS Security Group" "aws ec2 create-security-group --group-name language-vows-ecs-sg --description 'Security group for ECS tasks' --vpc-id $VPC_ID" || exit 1
     
-    # Wait a moment for the security group to be available
     sleep 2
 
-    # Get the security group ID using the full describe command for better debugging
     echo "DEBUG: Looking up newly created security group..." >&2
     ECS_SG=$(aws ec2 describe-security-groups \
         --filters "Name=vpc-id,Values=$VPC_ID" "Name=group-name,Values=language-vows-ecs-sg" \
@@ -72,13 +66,11 @@ else
     printf "$DEFAULT_FORMAT" "ECS Security Group" "SKIPPED" "Already exists"
 fi
 
-# Add inbound rules (idempotent)
 handle_status "Internal Access" "aws ec2 authorize-security-group-ingress \
     --group-id $ECS_SG \
     --protocol -1 \
     --source-group $ECS_SG" || true
 
-# Find default security group for RDS
 RDS_SG=$(aws ec2 describe-security-groups \
     --filters "Name=vpc-id,Values=$VPC_ID" "Name=group-name,Values=default" \
     --query 'SecurityGroups[0].GroupId' \

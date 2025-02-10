@@ -18,13 +18,11 @@ handle_status() {
     fi
 }
 
-# Check Fargate quotas
 handle_status "Fargate Quotas" "aws service-quotas list-service-quotas \
     --service-code fargate \
     --query 'Quotas[].[QuotaName,Value]' \
     --output text"
 
-# Check account status
 printf "\n=== Account Status ===\n\n"
 aws sts get-caller-identity \
     --query '{Account:Account,UserID:UserId,ARN:Arn}' \
