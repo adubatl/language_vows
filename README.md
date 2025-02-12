@@ -6,6 +6,10 @@ A Vue 3 + TypeScript application for managing programming language vows, with a 
 
 ## Development Setup
 
+Quick n easy
+brew install just && npm i && just be && just fe
+Disclaimer: _it worked on my machine <3_
+
 ### Prerequisites
 
 - Node.js (v18+)
